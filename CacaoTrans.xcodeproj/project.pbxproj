@@ -13,8 +13,10 @@
 		3AF6C02D59AECC3FA47F08DF /* TranscriptListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22FAEC28EE06C3D85CE94A9B /* TranscriptListView.swift */; };
 		3E22D58C4B74F76780EBCCAF /* PlaybackController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B43EC580ACBC2715F3CC4CE /* PlaybackController.swift */; };
 		631447D78CD4589C6ACF8D56 /* ProjectInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC18331BD209F77484FE6DB /* ProjectInfoSheet.swift */; };
+		63C5DF156C74A8B1E358B2D1 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 799F2805EBF8A538DD2C2D5C /* LICENSE */; };
 		67246BBBAF2E760A5BE4ACB6 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68E2C6C5C732FC13CF26ADB /* AppModel.swift */; };
 		6BAA06A377EA95D4306A513A /* TranscriptListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22FAEC28EE06C3D85CE94A9B /* TranscriptListView.swift */; };
+		6C9988CEBB8CC562431B4495 /* THIRD_PARTY_LICENSES.md in Resources */ = {isa = PBXBuildFile; fileRef = 4B2B0EC8F2700C1ADFFC665F /* THIRD_PARTY_LICENSES.md */; };
 		731EA45BAD80E8EBF5395008 /* FindReplaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B4083DD3C07B77F0141C06 /* FindReplaceView.swift */; };
 		7D6CD27A413096CF4F1ED51C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05995A01A82B346ACA2360EE /* InfoPlist.strings */; };
 		85F8F5D15C110077938176CA /* PlaybackController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B43EC580ACBC2715F3CC4CE /* PlaybackController.swift */; };
@@ -27,6 +29,7 @@
 		A009C4A208421CD0BC870A7E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655D262BC8B8ED2424369CC4 /* Assets.xcassets */; };
 		A0C2BA092BD57C557DCC5301 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F814B4493F44C0D59C743CDF /* main.swift */; };
 		AC0489896E189766BCB271EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 655D262BC8B8ED2424369CC4 /* Assets.xcassets */; };
+		ADAD28856D84E4AB4359C1BA /* THIRD_PARTY_LICENSES.md in Resources */ = {isa = PBXBuildFile; fileRef = 4B2B0EC8F2700C1ADFFC665F /* THIRD_PARTY_LICENSES.md */; };
 		B45742675DF2264FABEC26F7 /* CacaoTransEngine in Frameworks */ = {isa = PBXBuildFile; productRef = FC475174E39AD5235DF624FD /* CacaoTransEngine */; };
 		B742EA2FE5ECF2AE5382A368 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17C3663193DDEF0B3434E21 /* SettingsView.swift */; };
 		BBD86BCD46655D92CF7C4862 /* CacaoTransCore in Frameworks */ = {isa = PBXBuildFile; productRef = E490B79DFF32AA3191DB99E2 /* CacaoTransCore */; };
@@ -36,6 +39,7 @@
 		C9AE987879D92172AC19C592 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92D16EA9BABD3458DDE6D96 /* ContentView.swift */; };
 		CB29C53AAAEA6F5C9F4A6C58 /* CacaoTransCore in Frameworks */ = {isa = PBXBuildFile; productRef = 99435FBB0CACFBB03A54F2B5 /* CacaoTransCore */; };
 		D856AD848341B0EE2DEC420B /* ProjectInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BC18331BD209F77484FE6DB /* ProjectInfoSheet.swift */; };
+		DEE4578BA3F300A8CDF28D60 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 799F2805EBF8A538DD2C2D5C /* LICENSE */; };
 		EE6EF9A0F441E4927BFD738F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 05995A01A82B346ACA2360EE /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -49,9 +53,11 @@
 		2B2FBC833A79ABD7CC62A03A /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		2F4043918BE6E263CC2B8183 /* cacaoclaudetrans */ = {isa = PBXFileReference; includeInIndex = 0; path = cacaoclaudetrans; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C41FB5A6434590877697B57 /* CacaoTransApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacaoTransApp.swift; sourceTree = "<group>"; };
+		4B2B0EC8F2700C1ADFFC665F /* THIRD_PARTY_LICENSES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = THIRD_PARTY_LICENSES.md; sourceTree = "<group>"; };
 		4C45728F430D3395A82F67CB /* CacaoTrans.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CacaoTrans.entitlements; sourceTree = "<group>"; };
 		5BC18331BD209F77484FE6DB /* ProjectInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectInfoSheet.swift; sourceTree = "<group>"; };
 		655D262BC8B8ED2424369CC4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		799F2805EBF8A538DD2C2D5C /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		8B63CD3C257DB28BAF40388C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A1B4083DD3C07B77F0141C06 /* FindReplaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindReplaceView.swift; sourceTree = "<group>"; };
 		A2632B6D05916E41576D6972 /* PlayerBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerBar.swift; sourceTree = "<group>"; };
@@ -147,6 +153,8 @@
 		E21846E30AA93ADC3A26A9E3 = {
 			isa = PBXGroup;
 			children = (
+				799F2805EBF8A538DD2C2D5C /* LICENSE */,
+				4B2B0EC8F2700C1ADFFC665F /* THIRD_PARTY_LICENSES.md */,
 				FAA519A4BB9CEE786ECFDC3B /* CacaoTrans */,
 				A6820078C19337DEEDF72668 /* CacaoTransCLI */,
 				4E865DBC9EC904091256C0C8 /* Packages */,
@@ -287,6 +295,8 @@
 			files = (
 				A009C4A208421CD0BC870A7E /* Assets.xcassets in Resources */,
 				EE6EF9A0F441E4927BFD738F /* InfoPlist.strings in Resources */,
+				DEE4578BA3F300A8CDF28D60 /* LICENSE in Resources */,
+				ADAD28856D84E4AB4359C1BA /* THIRD_PARTY_LICENSES.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,6 +306,8 @@
 			files = (
 				AC0489896E189766BCB271EC /* Assets.xcassets in Resources */,
 				7D6CD27A413096CF4F1ED51C /* InfoPlist.strings in Resources */,
+				63C5DF156C74A8B1E358B2D1 /* LICENSE in Resources */,
+				6C9988CEBB8CC562431B4495 /* THIRD_PARTY_LICENSES.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

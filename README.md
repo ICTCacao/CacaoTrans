@@ -157,3 +157,9 @@ Apple の音声認識と話者分離は無料。Claude 校正は 60 分の会議
 - macOS 26 以降専用（SpeechAnalyzer が必要）。
 - 話者分離は声質で判定するため、似た声・電話音声・同時発話では取り違えが起きる。Claude の補正とアプリ上の付け替えで直す。
 - Claude の校正は「意味を変えない」前提のプロンプトだが、AI の出力なので最終確認は人が行う。校正前の原文は各行の ✨ アイコンと右クリック「校正前の文に戻す」で確認できる。
+
+## ライセンス
+
+- このリポジトリのコードは **MIT License**（[LICENSE](LICENSE)）。
+- CacaoClaudeTrans が組み込んでいる FluidAudio は **Apache License 2.0**。ライセンス全文は
+  [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) にあり、アプリ本体（Contents/Resources）にも同梱している。

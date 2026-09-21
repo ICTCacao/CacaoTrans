@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "07749A388302F8C8095C72C5"
-               BuildableName = "CacaoClaudeTrans.app"
-               BlueprintName = "CacaoClaudeTrans"
+               BlueprintIdentifier = "3BE0E0B056406E09F30D270B"
+               BuildableName = "cacaoclaudetrans"
+               BlueprintName = "cacaoclaudetrans"
                ReferencedContainer = "container:CacaoTrans.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "07749A388302F8C8095C72C5"
-            BuildableName = "CacaoClaudeTrans.app"
-            BlueprintName = "CacaoClaudeTrans"
+            BlueprintIdentifier = "3BE0E0B056406E09F30D270B"
+            BuildableName = "cacaoclaudetrans"
+            BlueprintName = "cacaoclaudetrans"
             ReferencedContainer = "container:CacaoTrans.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -55,9 +55,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "07749A388302F8C8095C72C5"
-            BuildableName = "CacaoClaudeTrans.app"
-            BlueprintName = "CacaoClaudeTrans"
+            BlueprintIdentifier = "3BE0E0B056406E09F30D270B"
+            BuildableName = "cacaoclaudetrans"
+            BlueprintName = "cacaoclaudetrans"
             ReferencedContainer = "container:CacaoTrans.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -74,9 +74,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "07749A388302F8C8095C72C5"
-            BuildableName = "CacaoClaudeTrans.app"
-            BlueprintName = "CacaoClaudeTrans"
+            BlueprintIdentifier = "3BE0E0B056406E09F30D270B"
+            BuildableName = "cacaoclaudetrans"
+            BlueprintName = "cacaoclaudetrans"
             ReferencedContainer = "container:CacaoTrans.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
