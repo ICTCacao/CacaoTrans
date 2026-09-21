@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import MediaPlayer
 import CacaoTransCore
 
 /// 元の音声を発話単位で再生する。
@@ -24,11 +25,55 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
     private var segmentsProvider: () -> [TranscriptSegment] = { [] }
     /// 単発再生のときの停止位置
     private var stopAt: Double?
+    /// Tab やクリックで本文に入った発話。次の再生開始はここから。
+    private var cuedSegmentID: Int?
 
     static let rates: [Float] = [0.75, 1.0, 1.25, 1.5, 2.0]
 
     func setSegmentsProvider(_ provider: @escaping () -> [TranscriptSegment]) {
         segmentsProvider = provider
+    }
+
+    // MARK: - メディアキー（キーボードの再生／一時停止・次・前）
+
+    private var remoteCommandsInstalled = false
+
+    private func installRemoteCommands() {
+        guard !remoteCommandsInstalled else { return }
+        remoteCommandsInstalled = true
+        let center = MPRemoteCommandCenter.shared()
+        center.togglePlayPauseCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.togglePlayPause() }
+            return .success
+        }
+        center.playCommand.addTarget { [weak self] _ in
+            Task { @MainActor in if self?.isPlaying == false { self?.togglePlayPause() } }
+            return .success
+        }
+        center.pauseCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.pause() }
+            return .success
+        }
+        center.nextTrackCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.playNext() }
+            return .success
+        }
+        center.previousTrackCommand.addTarget { [weak self] _ in
+            Task { @MainActor in self?.playPrevious() }
+            return .success
+        }
+    }
+
+    /// 「今再生中」情報を更新する。これがないとメディアキーがこのアプリに届かない。
+    private func updateNowPlaying(title: String? = nil) {
+        let center = MPNowPlayingInfoCenter.default()
+        var info = center.nowPlayingInfo ?? [:]
+        if let title { info[MPMediaItemPropertyTitle] = title }
+        info[MPMediaItemPropertyPlaybackDuration] = duration
+        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        info[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? Double(rate) : 0
+        center.nowPlayingInfo = info
+        center.playbackState = isLoaded ? (isPlaying ? .playing : .paused) : .stopped
     }
 
     // MARK: - Load
@@ -47,6 +92,8 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
         duration = p.duration
         currentTime = 0
         isLoaded = true
+        installRemoteCommands()
+        updateNowPlaying(title: url.lastPathComponent)
     }
 
     func unload() {
@@ -62,6 +109,7 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
         playingSegmentID = nil
         currentTime = 0
         duration = 0
+        updateNowPlaying()
     }
 
     // MARK: - Transport
@@ -72,6 +120,7 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
             pause()
             return
         }
+        cuedSegmentID = nil
         playingSegmentID = segment.id
         stopAt = continuous ? nil : max(segment.end, segment.start + 0.3)
         player.currentTime = max(0, segment.start)
@@ -79,6 +128,7 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
         player.play()
         isPlaying = true
         startTimer()
+        updateNowPlaying()
     }
 
     func togglePlayPause() {
@@ -86,6 +136,12 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
         if isPlaying {
             pause()
         } else {
+            // 本文に入っている発話があればそこから再生する
+            if let id = cuedSegmentID, let seg = segmentsProvider().first(where: { $0.id == id }) {
+                cuedSegmentID = nil
+                play(segment: seg)
+                return
+            }
             if playingSegmentID == nil, let first = segmentsProvider().first(where: matchesFilter) {
                 play(segment: first)
                 return
@@ -93,13 +149,27 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
             player.play()
             isPlaying = true
             startTimer()
+            updateNowPlaying()
         }
+    }
+
+    /// 本文に入った発話を再生対象にする（再生はしない）。再生中でなければ位置もその頭に合わせる。
+    func cue(segment: TranscriptSegment) {
+        guard let player else { return }
+        cuedSegmentID = segment.id
+        guard !isPlaying else { return }
+        playingSegmentID = segment.id
+        player.currentTime = max(0, segment.start)
+        currentTime = player.currentTime
+        stopAt = continuous ? nil : max(segment.end, segment.start + 0.3)
+        updateNowPlaying()
     }
 
     func pause() {
         player?.pause()
         isPlaying = false
         stopTimer()
+        updateNowPlaying()
     }
 
     func stop() {

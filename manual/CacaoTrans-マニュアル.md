@@ -48,7 +48,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 # CacaoTrans マニュアル
 
 文字起こしを聞きながら直して、仕上げるためのアプリ
-ベータ版 β1.00 ／ 2026 年 9 月
+バージョン 1.1.0 ／ 2026 年 9 月
 
 ---
 
@@ -96,7 +96,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. 受け取った **CacaoTrans-β1.00.dmg** をダブルクリック
+1. 受け取った **CacaoTrans-1.1.0.dmg** をダブルクリック
 2. 左の **CacaoTrans** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 
@@ -219,7 +219,8 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 **基本**
 - 行の ▶ を押すと、その発話だけ再生して止まる
-- もう一度押すと一時停止
+- もう一度押すか <kbd>F8</kbd> で一時停止
+- 本文に入っている発話（<kbd>Tab</kbd> やクリックで移った行）は <kbd>F8</kbd> で頭から再生
 - 再生中の行は色が付き、画面が自動で追従
 
 </div>
@@ -241,6 +242,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 ## 7. 本文を直す
 
 - 本文をクリックしてそのまま書き換えます（普通のテキスト入力）
+- <kbd>Tab</kbd> で次の発話、<kbd>⇧</kbd><kbd>Tab</kbd> で前の発話の本文へ移れます。移った発話は <kbd>F8</kbd> で頭から聞けます
 - 改行を入れたいときは <kbd>⌥</kbd><kbd>↩︎</kbd>
 - 直した内容はすぐ反映され、あとで **保存**（<kbd>⌘</kbd><kbd>S</kbd>）します
 
@@ -374,11 +376,12 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 |---|---|---|---|
 | プロジェクトを開く | <kbd>⌘</kbd><kbd>O</kbd> | 保存 | <kbd>⌘</kbd><kbd>S</kbd> |
 | 書き出し | <kbd>⌘</kbd><kbd>E</kbd> | 検索・置換 | <kbd>⌘</kbd><kbd>F</kbd> |
-| 再生／一時停止 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>P</kbd> | 次／前の発話 | <kbd>⌘</kbd><kbd>↓</kbd> ／ <kbd>⌘</kbd><kbd>↑</kbd> |
+| 再生／一時停止 | <kbd>F8</kbd> | 次／前の発話 | <kbd>⌘</kbd><kbd>↓</kbd> ／ <kbd>⌘</kbd><kbd>↑</kbd> |
 | カーソル位置で分割 | <kbd>⌘</kbd><kbd>↩︎</kbd> | 句点で分割 | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 前／次とつなげる | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>↓</kbd> | 選択をつなげる | <kbd>⌘</kbd><kbd>J</kbd> |
 | 後ろに発話を挿入 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> | 前に発話を挿入 | <kbd>⇧</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 元に戻す | <kbd>⌘</kbd><kbd>Z</kbd>（やり直し <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd>） | 本文内で改行 | <kbd>⌥</kbd><kbd>↩︎</kbd> |
+| 次／前の発話の本文へ | <kbd>Tab</kbd> ／ <kbd>⇧</kbd><kbd>Tab</kbd> | | |
 
 ---
 
@@ -401,4 +404,4 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 分からないことや不具合は、画面の写真を添えて管理者へ連絡してください。
 
-<p class="small">CacaoTrans β1.00 ／ © 2026 ICTCacao</p>
+<p class="small">CacaoTrans 1.1.0 ／ © 2026 ICTCacao</p>

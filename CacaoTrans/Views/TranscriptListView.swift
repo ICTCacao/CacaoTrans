@@ -154,6 +154,10 @@ struct SegmentRow: View {
 
             TextField("（発話を入力）", text: model.binding(for: segment.id), axis: .vertical)
                 .focused(focus, equals: segment.id)
+                .onKeyPress(keys: [.tab]) { press in
+                    model.focusAdjacentSegment(press.modifiers.contains(.shift) ? -1 : 1)
+                    return .handled
+                }
                 .textFieldStyle(.plain)
                 .font(.body)
                 .lineLimit(1...20)

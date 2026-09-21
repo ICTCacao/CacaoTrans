@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// ビルド対象ごとの名前。CLAUDE_TRANS が定義されていれば文字起こし版、なければ編集専用版。
 enum AppInfo {
@@ -92,7 +93,7 @@ struct CacaoTransApp: App {
             }
             CommandMenu("再生") {
                 Button("再生 / 一時停止") { model.playback.togglePlayPause() }
-                    .keyboardShortcut("p", modifiers: [.command, .shift])
+                    .keyboardShortcut(KeyEquivalent(Character(UnicodeScalar(NSF8FunctionKey)!)), modifiers: [])
                     .disabled(!model.playback.isLoaded)
                 Button("次の発話") { model.playback.playNext() }
                     .keyboardShortcut(.downArrow, modifiers: [.command])

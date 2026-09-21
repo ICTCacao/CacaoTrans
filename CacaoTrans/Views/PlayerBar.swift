@@ -38,7 +38,7 @@ struct PlayerBar: View {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                     .frame(width: 18, height: 16)
             }
-            .help("再生 / 一時停止（⇧⌘P）")
+            .help("再生 / 一時停止（F8）")
             Button { playback.playNext() } label: { Image(systemName: "forward.end.fill") }
                 .help("次の発話（⌘↓）")
         }

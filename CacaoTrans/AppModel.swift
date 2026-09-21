@@ -78,8 +78,14 @@ final class AppModel: ObservableObject {
     @Published var findOptions = FindReplaceOptions()
     @Published var showOnlyMatches = false
     @Published var lastReplaceMessage: String?
-    /// 本文を編集中（フォーカス中）の発話。分割・統合のキーボード操作の対象。
-    @Published var focusedSegmentID: Int?
+    /// 本文を編集中（フォーカス中）の発話。分割・統合のキーボード操作の対象で、F8 の再生対象にもなる。
+    @Published var focusedSegmentID: Int? {
+        didSet {
+            guard let id = focusedSegmentID, id != oldValue,
+                  let seg = transcript?.segments.first(where: { $0.id == id }) else { return }
+            playback.cue(segment: seg)
+        }
+    }
     /// 複数選択中の発話（一括でつなげる・話者変更・削除の対象）。
     @Published var selectedSegmentIDs: Set<Int> = []
     /// 「この音声について」シートの表示モード。
@@ -502,6 +508,20 @@ final class AppModel: ObservableObject {
             let nb = Int(b.dropFirst(2)) ?? Int.max
             return na == nb ? a < b : na < nb
         }
+    }
+
+    /// Tab / ⇧Tab: フォーカスを次（前）の発話の本文へ移す。
+    func focusAdjacentSegment(_ delta: Int) {
+        guard let t = transcript, !t.segments.isEmpty else { return }
+        let idx: Int
+        if let id = focusedSegmentID, let i = t.segments.firstIndex(where: { $0.id == id }) {
+            idx = i
+        } else {
+            idx = delta > 0 ? -1 : t.segments.count
+        }
+        let next = idx + delta
+        guard t.segments.indices.contains(next) else { return }
+        focusedSegmentID = t.segments[next].id
     }
 
     // MARK: - Split / merge
