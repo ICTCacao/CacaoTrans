@@ -1,0 +1,12 @@
+.DS_Store
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.build/
+.swiftpm/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+# 配布物: dmg と PDF は残し、.app と CLI バイナリはビルドで再生成する
+dist/*.app
+dist/cacaoclaudetrans
+dist/.tmp-*.dmg

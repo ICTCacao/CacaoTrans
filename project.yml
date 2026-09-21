@@ -1,0 +1,151 @@
+name: CacaoTrans
+options:
+  bundleIdPrefix: com.ictcacao
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+packages:
+  CacaoTransCore:
+    path: Packages/CacaoTransCore
+  CacaoTransEngine:
+    path: Packages/CacaoTransEngine
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: NO
+    SWIFT_STRICT_CONCURRENCY: minimal
+
+targetTemplates:
+  CacaoApp:
+    type: application
+    platform: macOS
+    sources:
+      - path: CacaoTrans
+        excludes:
+          - "Resources/*.plist"
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_EMIT_LOC_STRINGS: YES
+
+targets:
+  # 文字起こし版: 音声 → Apple 音声認識 + 話者分離 → Claude 校正 → 編集 → 書き出し
+  CacaoClaudeTrans:
+    templates: [CacaoApp]
+    dependencies:
+      - package: CacaoTransCore
+      - package: CacaoTransEngine
+    info:
+      path: CacaoTrans/Resources/Info-CacaoClaudeTrans.plist
+      properties:
+        CFBundleDisplayName: CacaoClaudeTrans
+        CFBundleName: CacaoClaudeTrans
+        CFBundleShortVersionString: "β1.00"
+        CFBundleVersion: "β1.00"
+        LSMinimumSystemVersion: "26.0"
+        CFBundleDevelopmentRegion: ja
+        CFBundleLocalizations: [ja, en]
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: "© 2026 ICTCacao"
+        NSSpeechRecognitionUsageDescription: "音声ファイルをこの Mac 上で文字起こしするために使用します。"
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: CacaoTrans プロジェクト
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [com.ictcacao.ccot]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.ictcacao.ccot
+            UTTypeDescription: CacaoTrans プロジェクト
+            UTTypeConformsTo: [public.json]
+            UTTypeTagSpecification:
+              public.filename-extension: [ccot, cacaotrans]
+              public.mime-type: application/json
+    entitlements:
+      path: CacaoTrans/Resources/CacaoClaudeTrans.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.files.user-selected.read-write: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ictcacao.CacaoClaudeTrans
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIconClaude
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) CLAUDE_TRANS"
+
+  # 編集専用版: 保存したプロジェクト（.ccot）を開いて編集・再生・書き出し。Claude API も音声認識も含まない
+  CacaoTrans:
+    templates: [CacaoApp]
+    dependencies:
+      - package: CacaoTransCore
+    info:
+      path: CacaoTrans/Resources/Info-CacaoTrans.plist
+      properties:
+        CFBundleDisplayName: CacaoTrans
+        CFBundleName: CacaoTrans
+        CFBundleShortVersionString: "β1.00"
+        CFBundleVersion: "β1.00"
+        LSMinimumSystemVersion: "26.0"
+        CFBundleDevelopmentRegion: ja
+        CFBundleLocalizations: [ja, en]
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: "© 2026 ICTCacao"
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: CacaoTrans プロジェクト
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+            LSItemContentTypes: [com.ictcacao.ccot]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.ictcacao.ccot
+            UTTypeDescription: CacaoTrans プロジェクト
+            UTTypeConformsTo: [public.json]
+            UTTypeTagSpecification:
+              public.filename-extension: [ccot, cacaotrans]
+              public.mime-type: application/json
+    entitlements:
+      path: CacaoTrans/Resources/CacaoTrans.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ictcacao.CacaoTrans
+
+  cacaoclaudetrans:
+    type: tool
+    platform: macOS
+    sources:
+      - CacaoTransCLI
+    dependencies:
+      - package: CacaoTransCore
+      - package: CacaoTransEngine
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ictcacao.cacaoclaudetrans-cli
+        PRODUCT_NAME: cacaoclaudetrans
+
+schemes:
+  CacaoClaudeTrans:
+    build:
+      targets:
+        CacaoClaudeTrans: all
+    run:
+      config: Debug
+  CacaoTrans:
+    build:
+      targets:
+        CacaoTrans: all
+    run:
+      config: Debug
+  cacaoclaudetrans:
+    build:
+      targets:
+        cacaoclaudetrans: all
+    run:
+      config: Debug
