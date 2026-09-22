@@ -12,17 +12,59 @@ enum AppInfo {
     #endif
 }
 
+/// ウインドウを閉じたらアプリも終了する。未保存なら確認してから。
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    static var model: AppModel?
+    static var reopenWindow: (() -> Void)?
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let model = Self.model else { return .terminateNow }
+        if model.isProcessing {
+            let alert = NSAlert()
+            alert.messageText = "処理の途中です"
+            alert.informativeText = "中止して終了しますか？"
+            alert.addButton(withTitle: "中止して終了")
+            alert.addButton(withTitle: "キャンセル")
+            if alert.runModal() == .alertFirstButtonReturn { return .terminateNow }
+            Self.reopenWindow?()
+            return .terminateCancel
+        }
+        guard model.isDirty, model.transcript != nil else { return .terminateNow }
+        let alert = NSAlert()
+        alert.messageText = "保存していない変更があります"
+        alert.informativeText = "終了する前にプロジェクト（.ccot）を保存しますか？"
+        alert.addButton(withTitle: "保存して終了")
+        alert.addButton(withTitle: "保存せずに終了")
+        alert.addButton(withTitle: "キャンセル")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            model.saveProject()
+            if !model.isDirty { return .terminateNow }
+        case .alertSecondButtonReturn:
+            return .terminateNow
+        default:
+            break
+        }
+        Self.reopenWindow?()
+        return .terminateCancel
+    }
+}
+
 @main
 struct CacaoTransApp: App {
     @StateObject private var model = AppModel()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(model.playback)
                 .frame(minWidth: 900, minHeight: 600)
                 .onOpenURL { url in model.openProject(at: url) }
+                .onAppear { AppDelegate.model = model }
         }
         .commands {
             CommandGroup(replacing: .systemServices) {}
@@ -77,6 +119,9 @@ struct CacaoTransApp: App {
                 Button("選択した発話をつなげる") { model.mergeSelected() }
                     .keyboardShortcut("j", modifiers: [.command])
                     .disabled(model.selectedSegmentIDs.count < 2)
+                Button("連続する同じ話者の発話をすべてつなげる") { model.mergeConsecutiveSameSpeaker() }
+                    .keyboardShortcut("j", modifiers: [.command, .shift])
+                    .disabled(model.transcript == nil)
                 Button("選択を解除") { model.clearSelection() }
                     .disabled(model.selectedSegmentIDs.isEmpty)
                 Divider()
@@ -116,6 +161,11 @@ struct CacaoTransApp: App {
                 Divider()
                 Button("この音声について（背景・用語集）…") { model.infoSheet = .edit }
                     .disabled(model.transcript == nil)
+                Divider()
+                Button("音声を圧縮してプロジェクトに同梱") { model.embedAudio() }
+                    .disabled(model.transcript == nil || model.audioURL == nil || model.isProcessing)
+                Button("同梱した音声を外す") { model.removeEmbeddedAudio() }
+                    .disabled(model.transcript?.embeddedAudio == nil || model.isProcessing)
             }
             #endif
         }

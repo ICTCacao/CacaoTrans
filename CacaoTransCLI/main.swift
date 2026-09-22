@@ -2,7 +2,7 @@ import Foundation
 import CacaoTransCore
 import CacaoTransEngine
 
-// 検証用 CLI: cacaotrans <音声ファイル> [--no-claude] [--no-diarize] [--format txt|md|docx|srt|csv|json] [--out パス] [--glossary ファイル]
+// 検証用 CLI: cacaotrans <音声ファイル> [--no-claude] [--no-diarize] [--format txt|md|docx|srt|csv|json] [--out パス] [--glossary ファイル] [--embed-audio]
 
 func usage() -> Never {
     FileHandle.standardError.write(Data("""
@@ -14,6 +14,7 @@ func usage() -> Never {
       --model <id>       Claude モデル（既定: claude-opus-5）
       --glossary <file>  用語集テキスト
       --context <text>   音声の背景（例: "元兵士への聞き取り。聞き手は山田"）
+      --embed-audio      音声を圧縮してプロジェクトに同梱する（--format json のとき）
     API キーは環境変数 ANTHROPIC_API_KEY またはキーチェーン（アプリ設定画面で保存）から読みます。
 
     """.utf8))
@@ -58,6 +59,7 @@ while i < args.count {
         options.refiner.glossary = (try? String(contentsOfFile: value(), encoding: .utf8)) ?? ""
     case "--context":
         options.refiner.context = value()
+    case "--embed-audio": options.embedAudio = true
     default: usage()
     }
     i += 1

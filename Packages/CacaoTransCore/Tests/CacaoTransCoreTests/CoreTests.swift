@@ -120,6 +120,28 @@ import Foundation
         let back = try Transcript.fromProjectData(data)
         #expect(back.segments == t.segments)
         #expect(back.speakerNames == t.speakerNames)
+        #expect(back.embeddedAudio == nil)
+    }
+
+    @Test func projectRoundTripWithEmbeddedAudio() throws {
+        var t = sample()
+        let bytes = Data((0..<4096).map { UInt8($0 % 251) })
+        t.embeddedAudio = EmbeddedAudio(fileExtension: "m4a", data: bytes, codecDescription: "AAC 48kbps モノラル")
+        let back = try Transcript.fromProjectData(try t.projectData())
+        #expect(back.embeddedAudio?.data == bytes)
+        #expect(back.embeddedAudio?.fileExtension == "m4a")
+        #expect(back.version == Transcript.formatVersion)
+    }
+
+    /// 旧バージョン（version 1、embeddedAudio なし）のファイルも読める。
+    @Test func projectReadsVersion1() throws {
+        let json = """
+        {"version":1,"sourceFileName":"a.m4a","duration":3,"createdAt":"2026-09-21T00:00:00Z",
+         "segments":[{"id":1,"speaker":"話者1","start":0,"end":1,"text":"はい"}],"speakerNames":{},"notes":""}
+        """
+        let t = try Transcript.fromProjectData(Data(json.utf8))
+        #expect(t.segments.count == 1)
+        #expect(t.embeddedAudio == nil)
     }
 
     @Test func crc32KnownValue() {

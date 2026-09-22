@@ -18,7 +18,6 @@ struct FindReplaceView: View {
                     .onSubmit { model.replaceAll() }
                 Toggle("大文字と小文字を区別", isOn: $model.findOptions.caseSensitive)
                 Toggle("正規表現を使う", isOn: $model.findOptions.useRegex)
-                Toggle("一致する発話だけ表示", isOn: $model.showOnlyMatches)
             }
             Section {
                 HStack {
@@ -32,12 +31,20 @@ struct FindReplaceView: View {
                     }
                     Spacer()
                 }
+                // 横並びにしない: 件数の文字幅が変わるとインスペクタ列の最小幅が変わり、AppKit の制約更新中に落ちる
+                Toggle("一致する発話だけ表示", isOn: $model.showOnlyMatches)
+                    .toggleStyle(.switch)
+                    .disabled(model.findQuery.isEmpty)
                 HStack {
                     Button("すべて置換") { model.replaceAll() }
                         .buttonStyle(.borderedProminent)
                         .disabled(model.findQuery.isEmpty || model.matchCount == 0 || model.findValidationMessage != nil)
                     Button("元に戻す") { model.undo() }
                         .disabled(!model.canUndo)
+                    Spacer()
+                    Button("クリア") { model.clearFind() }
+                        .disabled(model.findQuery.isEmpty && model.replaceText.isEmpty)
+                        .help("検索語・置換語・絞り込みを空にする")
                 }
             }
             Section("使い方のヒント") {
@@ -63,8 +70,9 @@ struct ProgressSheet: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
+        let compressingOnly = model.progress?.stage == .compressing && model.transcript != nil
         VStack(alignment: .leading, spacing: 14) {
-            Text("文字起こし中")
+            Text(compressingOnly ? "音声を圧縮中" : "文字起こし中")
                 .font(.headline)
             ProgressView(value: model.progress?.fraction ?? 0)
                 .progressViewStyle(.linear)
@@ -80,9 +88,11 @@ struct ProgressSheet: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            Text("初回は音声認識モデルと話者分離モデルのダウンロードで数分かかります。")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            if !compressingOnly {
+                Text("初回は音声認識モデルと話者分離モデルのダウンロードで数分かかります。")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
             HStack {
                 Spacer()
                 Button("中止") { model.cancel() }

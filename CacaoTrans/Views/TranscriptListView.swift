@@ -8,8 +8,8 @@ struct TranscriptListView: View {
 
     var body: some View {
         let segments = model.transcript?.segments ?? []
-        let matching = model.showOnlyMatches && !model.findQuery.isEmpty ? model.matchingSegmentIDs : nil
-        let visible = matching.map { ids in segments.filter { ids.contains($0.id) } } ?? segments
+        let ranges = model.matchRangesBySegment
+        let visible = model.showOnlyMatches && !ranges.isEmpty ? segments.filter { ranges[$0.id] != nil } : segments
 
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
@@ -19,7 +19,7 @@ struct TranscriptListView: View {
             List(selection: $model.selectedSegmentIDs) {
                 ForEach(visible) { seg in
                     SegmentRow(segment: seg,
-                               highlighted: matching == nil && !model.findQuery.isEmpty && model.matchingSegmentIDs.contains(seg.id),
+                               matchRanges: ranges[seg.id] ?? [],
                                focus: $focusedSegment)
                         .id(seg.id)
                         .listRowSeparator(.visible)
@@ -91,11 +91,28 @@ struct SegmentRow: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var playback: PlaybackController
     let segment: TranscriptSegment
-    let highlighted: Bool
+    /// 検索に一致した本文中の範囲（UTF-16 オフセット）。空なら一致なし。
+    let matchRanges: [Range<Int>]
     let focus: FocusState<Int?>.Binding
 
     private var isCurrent: Bool { playback.playingSegmentID == segment.id }
     private var isSelected: Bool { model.selectedSegmentIDs.contains(segment.id) }
+    private var highlighted: Bool { !matchRanges.isEmpty }
+    /// 一致があり、かつ編集中でなければ、一致部分を強調した表示に差し替える。
+    private var showsHighlightedText: Bool { highlighted && focus.wrappedValue != segment.id }
+
+    private var highlightedText: AttributedString {
+        var attr = AttributedString(segment.text)
+        for r in matchRanges {
+            guard let range = Range(NSRange(location: r.lowerBound, length: r.count), in: segment.text),
+                  let lower = AttributedString.Index(range.lowerBound, within: attr),
+                  let upper = AttributedString.Index(range.upperBound, within: attr) else { continue }
+            attr[lower..<upper].backgroundColor = Color.yellow.opacity(0.85)
+            attr[lower..<upper].foregroundColor = Color.black
+            attr[lower..<upper].font = .body.bold()
+        }
+        return attr
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
@@ -152,17 +169,26 @@ struct SegmentRow: View {
             }
             .frame(width: 110, alignment: .leading)
 
-            TextField("（発話を入力）", text: model.binding(for: segment.id), axis: .vertical)
-                .focused(focus, equals: segment.id)
-                .onKeyPress(keys: [.tab]) { press in
-                    model.focusAdjacentSegment(press.modifiers.contains(.shift) ? -1 : 1)
-                    return .handled
+            // 一致部分の強調表示は編集できないので、入力欄を透明にして上に重ねる（クリックすると入力欄にフォーカスが移り、通常表示に戻る）
+            ZStack(alignment: .topLeading) {
+                TextField("（発話を入力）", text: model.binding(for: segment.id), axis: .vertical)
+                    .focused(focus, equals: segment.id)
+                    .onKeyPress(keys: [.tab]) { press in
+                        model.focusAdjacentSegment(press.modifiers.contains(.shift) ? -1 : 1)
+                        return .handled
+                    }
+                    .textFieldStyle(.plain)
+                    .font(.body)
+                    .lineLimit(1...20)
+                    .opacity(showsHighlightedText ? 0 : 1)
+                if showsHighlightedText {
+                    Text(highlightedText)
+                        .font(.body)
+                        .allowsHitTesting(false)
                 }
-                .textFieldStyle(.plain)
-                .font(.body)
-                .lineLimit(1...20)
-                .padding(6)
-                .background(highlighted ? Color.yellow.opacity(0.18) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+            }
+            .padding(6)
+            .background(highlighted ? Color.yellow.opacity(0.18) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
 
             if let original = segment.originalText, original != segment.text {
                 Image(systemName: "sparkles")

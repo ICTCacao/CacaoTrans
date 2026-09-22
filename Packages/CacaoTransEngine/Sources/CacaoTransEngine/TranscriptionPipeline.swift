@@ -8,6 +8,8 @@ public struct PipelineOptions: Sendable, Equatable {
     public var claude: ClaudeConfig?
     public var refiner: RefinerOptions = RefinerOptions()
     public var assigner: SpeakerAssigner.Options = SpeakerAssigner.Options()
+    /// 音声を圧縮してプロジェクト（Transcript.embeddedAudio）に同梱する。
+    public var embedAudio: Bool = false
 
     public init() {}
 }
@@ -19,6 +21,7 @@ public enum PipelineStage: String, Sendable, CaseIterable {
     case diarizing = "話者分離中"
     case assembling = "発話を組み立て中"
     case refining = "Claude で校正中"
+    case compressing = "音声を圧縮して同梱中"
     case done = "完了"
 }
 
@@ -114,6 +117,15 @@ public actor TranscriptionPipeline {
             result.refineFailedChunks = outcome.failedChunks
             result.refineTotalChunks = outcome.totalChunks
             result.refineError = outcome.lastErrorDescription
+        }
+        if options.embedAudio {
+            let start = base + wTranscribe + wDiarize + wRefine
+            let wCompress = max(0, 1 - start)
+            progress(PipelineProgress(stage: .compressing, fraction: start))
+            result.transcript.embeddedAudio = try AudioCompressor.embeddedAudio(for: url) { p in
+                progress(PipelineProgress(stage: .compressing, fraction: start + p * wCompress,
+                                          detail: "\(Transcript.formatTime(p * duration)) / \(Transcript.formatTime(duration))"))
+            }
         }
         progress(PipelineProgress(stage: .done, fraction: 1))
         return result

@@ -79,9 +79,15 @@ struct SettingsView: View {
 
     private var transcriptionTab: some View {
         Form {
-            Section("処理") {
+            Section {
                 Toggle("Claude で校正する", isOn: $model.settings.useClaude)
                 Toggle("話者を分離する", isOn: $model.settings.useDiarization)
+                Toggle("音声を圧縮してプロジェクトに同梱する", isOn: $model.settings.embedAudio)
+            } header: {
+                Text("処理")
+            } footer: {
+                Text("同梱すると .ccot だけ渡せば作業員の Mac で再生できます（\(AudioCompressor.codecDescription)、1時間で 20MB ほど）。あとから「文字起こし」メニューでも同梱・解除できます。")
+                    .font(.caption)
             }
             Section {
                 TextField("例: 地域の子育て支援に関する3人のインタビュー", text: $model.settings.context)
@@ -89,7 +95,7 @@ struct SettingsView: View {
             } header: {
                 Text("音声の背景の初期値")
             } footer: {
-                Text("文字起こしを始めるとき「この音声について」シートにこの内容が入った状態で出ます。音声ごとの背景はそこで書き換え、プロジェクトに保存されます。")
+                Text("文字起こしを始めるとき「この音声について」シートの「共通の背景」にこの内容が入った状態で出ます。シートで共通の欄を書き換えて開始すると、ここも更新されます。音声ごとの違いは「追記」の欄へ。")
                     .font(.caption)
             }
             Section("音声認識") {
@@ -110,7 +116,7 @@ struct SettingsView: View {
             } header: {
                 Text("用語集の初期値（1行に1つ）")
             } footer: {
-                Text("すべての音声に共通する固有名詞・専門用語をここに。文字起こし開始時のシートにこの内容が入り、音声ごとに追記してプロジェクトに保存されます。例:\n山田太郎（やまだ・たろう）: 事務局長\nCGW: 当社の顧客管理システム")
+                Text("すべての音声に共通する固有名詞・専門用語をここに。文字起こし開始時のシートの「共通の用語集」に入り、シートで書き換えて開始するとここも更新されます。音声ごとの語は「追記」の欄へ。例:\n山田太郎（やまだ・たろう）: 事務局長\nCGW: 当社の顧客管理システム")
                     .font(.caption)
             }
         }

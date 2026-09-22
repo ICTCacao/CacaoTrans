@@ -52,8 +52,8 @@ targets:
       properties:
         CFBundleDisplayName: CacaoClaudeTrans
         CFBundleName: CacaoClaudeTrans
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "1.1.0"
+        CFBundleShortVersionString: "2.0.0"
+        CFBundleVersion: "2.0.0"
         LSMinimumSystemVersion: "26.0"
         CFBundleDevelopmentRegion: ja
         CFBundleLocalizations: [ja, en]
@@ -94,8 +94,8 @@ targets:
       properties:
         CFBundleDisplayName: CacaoTrans
         CFBundleName: CacaoTrans
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "1.1.0"
+        CFBundleShortVersionString: "2.0.0"
+        CFBundleVersion: "2.0.0"
         LSMinimumSystemVersion: "26.0"
         CFBundleDevelopmentRegion: ja
         CFBundleLocalizations: [ja, en]
@@ -148,7 +148,8 @@ schemes:
         CacaoTrans: all
     run:
       config: Debug
-  cacaoclaudetrans:
+  # 名前を CacaoClaudeTrans と大文字小文字違いにしない（xcscheme のファイル名が衝突して上書きされる）
+  cacaoclaudetrans-cli:
     build:
       targets:
         cacaoclaudetrans: all

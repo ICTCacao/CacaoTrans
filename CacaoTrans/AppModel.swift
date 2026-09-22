@@ -21,6 +21,8 @@ struct AppSettings: Equatable {
     var exportTimestamps = true
     var exportSpeakers = true
     var exportMerge = true
+    /// 文字起こし後に音声を圧縮してプロジェクトに同梱する。
+    var embedAudio = true
 
     private static let key = "CacaoTrans.settings"
 
@@ -32,6 +34,7 @@ struct AppSettings: Equatable {
         out.removeFillers = s.removeFillers; out.allowSpeakerFix = s.allowSpeakerFix; out.chunkCharacters = s.chunkCharacters
         out.glossary = s.glossary; out.context = s.context
         out.exportTimestamps = s.exportTimestamps; out.exportSpeakers = s.exportSpeakers; out.exportMerge = s.exportMerge
+        out.embedAudio = s.embedAudio ?? true
         return out
     }
 
@@ -39,7 +42,8 @@ struct AppSettings: Equatable {
         let s = Stored(model: model, effort: effort, useClaude: useClaude, useDiarization: useDiarization,
                        removeFillers: removeFillers, allowSpeakerFix: allowSpeakerFix, chunkCharacters: chunkCharacters,
                        glossary: glossary, context: context,
-                       exportTimestamps: exportTimestamps, exportSpeakers: exportSpeakers, exportMerge: exportMerge)
+                       exportTimestamps: exportTimestamps, exportSpeakers: exportSpeakers, exportMerge: exportMerge,
+                       embedAudio: embedAudio)
         if let data = try? JSONEncoder().encode(s) {
             UserDefaults.standard.set(data, forKey: Self.key)
         }
@@ -51,6 +55,8 @@ struct AppSettings: Equatable {
         var chunkCharacters: Int
         var glossary, context: String
         var exportTimestamps, exportSpeakers, exportMerge: Bool
+        // 1.1.0 以前の保存データにはない
+        var embedAudio: Bool?
     }
 }
 
@@ -87,7 +93,21 @@ final class AppModel: ObservableObject {
         }
     }
     /// 複数選択中の発話（一括でつなげる・話者変更・削除の対象）。
-    @Published var selectedSegmentIDs: Set<Int> = []
+    /// 1件だけ選んだとき（↑↓ キーでの移動を含む）はその発話を再生対象にする。
+    @Published var selectedSegmentIDs: Set<Int> = [] {
+        didSet {
+            guard !selectingFromPlayback, selectedSegmentIDs.count == 1, selectedSegmentIDs != oldValue,
+                  let id = selectedSegmentIDs.first else { return }
+            // List の選択処理（AppKit のレイアウト中）から抜けてから再生側を更新する
+            Task { @MainActor [weak self] in
+                guard let self, self.selectedSegmentIDs == [id],
+                      let seg = self.transcript?.segments.first(where: { $0.id == id }) else { return }
+                self.playback.cue(segment: seg)
+            }
+        }
+    }
+    /// 再生側から選択を合わせている最中（このときは再生対象を付け替えない）。
+    private var selectingFromPlayback = false
     /// 「この音声について」シートの表示モード。
     @Published var infoSheet: InfoSheetMode?
     /// 文字起こし開始前にシートで入力した背景・用語集。
@@ -139,6 +159,36 @@ final class AppModel: ObservableObject {
 
     let playback = PlaybackController()
     let audioFolder = AudioFolderStore()
+    /// 同梱音声を再生用に書き出した一時ファイル（audioURL がこれなら同梱音声で再生している）。
+    @Published private(set) var embeddedTempURL: URL?
+
+    var isUsingEmbeddedAudio: Bool { embeddedTempURL != nil && audioURL == embeddedTempURL }
+
+    /// サイドバー用の「音声」欄の文言（短く。詳細は audioSourceHelp）。
+    var audioSourceDescription: String {
+        guard let t = transcript else { return "" }
+        if let e = t.embeddedAudio {
+            let size = ByteCountFormatter.string(fromByteCount: Int64(e.byteCount), countStyle: .file)
+            return audioURL != nil && !isUsingEmbeddedAudio ? "同梱 \(size)・元ファイル再生" : "同梱 \(size)"
+        }
+        return audioURL == nil ? "同梱なし・未接続" : "同梱なし・元ファイル"
+    }
+
+    var audioSourceHelp: String {
+        guard let t = transcript else { return "" }
+        var lines: [String] = []
+        if let e = t.embeddedAudio {
+            lines.append("プロジェクトに音声を同梱しています" + (e.codecDescription.map { "（\($0)）" } ?? ""))
+        } else {
+            lines.append("音声はプロジェクトに同梱されていません")
+        }
+        if let audioURL {
+            lines.append(isUsingEmbeddedAudio ? "再生: 同梱した音声" : "再生: \(audioURL.path)")
+        } else {
+            lines.append("再生: 音声が見つかりません")
+        }
+        return lines.joined(separator: "\n")
+    }
 
     private var undoStack: [Transcript] = []
     private var redoStack: [Transcript] = []
@@ -148,6 +198,36 @@ final class AppModel: ObservableObject {
 
     init() {
         playback.setSegmentsProvider { [weak self] in self?.transcript?.segments ?? [] }
+        installSpaceKeyMonitor()
+        // F8 などで再生を始めた発話を選択状態にする（本文を編集中・複数選択中は触らない）
+        playback.onStartSegment = { [weak self] id in
+            guard let self, self.focusedSegmentID == nil, self.selectedSegmentIDs.count <= 1,
+                  self.selectedSegmentIDs != [id] else { return }
+            self.selectingFromPlayback = true
+            self.selectedSegmentIDs = [id]
+            self.selectingFromPlayback = false
+        }
+    }
+
+    /// 発話を1件選んでいる（文字を入力中ではない）とき、Space でその発話を頭から再生する。何度でも聞き直せる。
+    /// リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
+    private func installSpaceKeyMonitor() {
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, event.keyCode == 49,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).subtracting([.capsLock, .numericPad, .function]).isEmpty,
+                  let window = event.window, window.attachedSheet == nil,
+                  !(window.firstResponder is NSText),
+                  self.replaySelectedSegment() else { return event }
+            return nil
+        }
+    }
+
+    /// 1件だけ選んでいる発話を頭から再生する。再生できたら true。
+    private func replaySelectedSegment() -> Bool {
+        guard playback.isLoaded, selectedSegmentIDs.count == 1, let id = selectedSegmentIDs.first,
+              let seg = transcript?.segments.first(where: { $0.id == id }) else { return false }
+        playback.replay(segment: seg)
+        return true
     }
 
     // MARK: - Derived
@@ -157,13 +237,24 @@ final class AppModel: ObservableObject {
         return FindReplace.count(in: transcript, query: findQuery, options: findOptions)
     }
 
-    var matchingSegmentIDs: Set<Int> {
-        guard let transcript, !findQuery.isEmpty else { return [] }
-        return Set(FindReplace.matches(in: transcript, query: findQuery, options: findOptions).map(\.segmentID))
-    }
-
     var findValidationMessage: String? {
         FindReplace.validate(query: findQuery, options: findOptions)
+    }
+
+    /// 発話 ID → 本文中の一致範囲（UTF-16 オフセット）。一覧の描画で1回だけ計算して各行に配る。
+    var matchRangesBySegment: [Int: [Range<Int>]] {
+        guard let transcript, !findQuery.isEmpty, findValidationMessage == nil else { return [:] }
+        var out: [Int: [Range<Int>]] = [:]
+        for m in FindReplace.matches(in: transcript, query: findQuery, options: findOptions) {
+            out[m.segmentID, default: []].append(m.range)
+        }
+        return out
+    }
+
+    func clearFind() {
+        findQuery = ""
+        replaceText = ""
+        showOnlyMatches = false
     }
 
     // MARK: - File open
@@ -205,6 +296,10 @@ final class AppModel: ObservableObject {
 
     /// 再生用に音声ファイルを結び付ける。
     func attachAudio(_ url: URL, securityScoped: Bool) {
+        if let tmp = embeddedTempURL, tmp != url {
+            playback.unload()
+            discardEmbeddedTemp()
+        }
         audioURL = url
         do {
             try playback.load(url: url, securityScoped: securityScoped)
@@ -220,9 +315,33 @@ final class AppModel: ObservableObject {
         transcript.sourceBookmark = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
     }
 
-    /// 保存済みプロジェクトから音声ファイルを探して結び付ける。
+    /// 同梱音声を一時ファイルに書き出す（AVAudioPlayer と再文字起こしが URL を要るため）。
+    private func materializeEmbeddedAudio(_ audio: EmbeddedAudio, sourceFileName: String) -> URL? {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("EmbeddedAudio", isDirectory: true)
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        var base = (sourceFileName as NSString).deletingPathExtension
+        if base.isEmpty { base = "audio" }
+        let url = dir.appendingPathComponent(base + "." + audio.fileExtension)
+        do {
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            try audio.data.write(to: url)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
+    private func discardEmbeddedTemp() {
+        guard let url = embeddedTempURL else { return }
+        embeddedTempURL = nil
+        try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
+    }
+
+    /// 保存済みプロジェクトから音声を探して結び付ける。元ファイル → 同梱音声 → 音声フォルダ の順。
     private func restoreAudio(from transcript: Transcript) {
         playback.unload()
+        discardEmbeddedTemp()
         audioURL = nil
         if let data = transcript.sourceBookmark {
             var stale = false
@@ -238,6 +357,12 @@ final class AppModel: ObservableObject {
                 attachAudio(url, securityScoped: false)
                 return
             }
+        }
+        if let embedded = transcript.embeddedAudio,
+           let url = materializeEmbeddedAudio(embedded, sourceFileName: transcript.sourceFileName) {
+            embeddedTempURL = url
+            attachAudio(url, securityScoped: false)
+            return
         }
         // 音声フォルダ（既定: 書類/CacaoTrans）から同名ファイルを探す
         let candidates = [transcript.sourceFileName,
@@ -347,6 +472,12 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// ウインドウのタイトル。プロジェクトを開いている／保存済みならその名前、まだなら音声ファイル名。
+    var windowTitle: String {
+        if let projectURL { return projectURL.deletingPathExtension().lastPathComponent }
+        return transcript?.sourceFileName ?? audioURL?.lastPathComponent ?? AppInfo.name
+    }
+
     var defaultBaseName: String {
         let name = transcript?.sourceFileName ?? audioURL?.lastPathComponent ?? "transcript"
         return (name as NSString).deletingPathExtension
@@ -357,11 +488,15 @@ final class AppModel: ObservableObject {
     #if CLAUDE_TRANS
     func startTranscription() {
         guard let audioURL, !isProcessing else { return }
-        let options = makePipelineOptions()
+        var options = makePipelineOptions()
         if options.useClaude && options.claude == nil {
             errorMessage = "Claude の API キーが未設定です。設定画面（⌘,）で入力するか、設定で「Claude で校正」をオフにしてください。"
             return
         }
+        // 同梱音声から再文字起こしするときは、圧縮し直さず前の同梱音声と元ファイル参照を引き継ぐ
+        let usingEmbedded = isUsingEmbeddedAudio
+        let previous = transcript
+        options.embedAudio = settings.embedAudio && !usingEmbedded
         isProcessing = true
         progress = PipelineProgress(stage: .loading, fraction: 0)
         errorMessage = nil
@@ -372,7 +507,14 @@ final class AppModel: ObservableObject {
                     Task { @MainActor in self?.progress = p }
                 }
                 var transcript = result.transcript
-                self.storeAudioReference(audioURL, into: &transcript)
+                if usingEmbedded, let previous {
+                    transcript.sourceFileName = previous.sourceFileName
+                    transcript.sourceFilePath = previous.sourceFilePath
+                    transcript.sourceBookmark = previous.sourceBookmark
+                    transcript.embeddedAudio = previous.embeddedAudio
+                } else {
+                    self.storeAudioReference(audioURL, into: &transcript)
+                }
                 transcript.context = self.pendingContext ?? self.settings.context
                 transcript.glossary = self.pendingGlossary ?? self.settings.glossary
                 self.transcript = transcript
@@ -428,6 +570,59 @@ final class AppModel: ObservableObject {
         runningTask = nil
         isProcessing = false
         progress = nil
+    }
+
+    // MARK: - Embedded audio
+
+    /// 今結び付いている音声を圧縮してプロジェクトに同梱する（保存すると .ccot に含まれる）。
+    func embedAudio() {
+        guard transcript != nil, let audioURL, !isProcessing else { return }
+        if isUsingEmbeddedAudio {
+            lastReplaceMessage = "この音声はすでに同梱されています"
+            return
+        }
+        isProcessing = true
+        progress = PipelineProgress(stage: .compressing, fraction: 0)
+        runningTask = Task {
+            do {
+                let worker = Task.detached(priority: .userInitiated) { [weak self] in
+                    try AudioCompressor.embeddedAudio(for: audioURL) { p in
+                        Task { @MainActor in
+                            self?.progress = PipelineProgress(stage: .compressing, fraction: p)
+                        }
+                    }
+                }
+                let audio = try await withTaskCancellationHandler {
+                    try await worker.value
+                } onCancel: {
+                    worker.cancel()
+                }
+                if var t = self.transcript {
+                    t.embeddedAudio = audio
+                    self.transcript = t
+                    let size = ByteCountFormatter.string(fromByteCount: Int64(audio.byteCount), countStyle: .file)
+                    self.lastReplaceMessage = "音声を同梱しました（\(size)）。保存（⌘S）すると .ccot に含まれます"
+                }
+            } catch is CancellationError {
+                // 中止
+            } catch {
+                self.errorMessage = "音声を圧縮できませんでした: \(error.localizedDescription)"
+            }
+            self.isProcessing = false
+            self.progress = nil
+        }
+    }
+
+    /// 同梱した音声をプロジェクトから外す（ファイルを小さくしたいとき）。
+    func removeEmbeddedAudio() {
+        guard var t = transcript, t.embeddedAudio != nil else { return }
+        if isUsingEmbeddedAudio {
+            errorMessage = "同梱した音声で再生しているため外せません。「再生」メニューの「音声ファイルを指定…」で元の音声を結び付けてから外してください。"
+            return
+        }
+        t.embeddedAudio = nil
+        transcript = t
+        lastReplaceMessage = "同梱した音声を外しました。保存（⌘S）すると .ccot から消えます"
     }
 
     private func makeClaudeConfig(key: String) -> ClaudeConfig {
@@ -682,6 +877,33 @@ final class AppModel: ObservableObject {
         transcript = t
         selectedSegmentIDs.removeAll()
         lastReplaceMessage = "\(n) 件を削除しました"
+    }
+
+    /// 連続する同じ話者の発話を全体にわたって1つにつなげる（仕上げ用）。
+    func mergeConsecutiveSameSpeaker() {
+        guard var t = transcript, t.segments.count >= 2 else { return }
+        var merged: [TranscriptSegment] = []
+        var joined = 0
+        for seg in t.segments {
+            if var last = merged.last, last.speaker == seg.speaker {
+                last.text += seg.text
+                last.end = max(last.end, seg.end)
+                last.originalText = nil
+                merged[merged.count - 1] = last
+                joined += 1
+            } else {
+                merged.append(seg)
+            }
+        }
+        guard joined > 0 else {
+            lastReplaceMessage = "連続する同じ話者の発話はありません"
+            return
+        }
+        pushUndo()
+        t.segments = merged
+        transcript = t
+        selectedSegmentIDs.removeAll()
+        lastReplaceMessage = "\(joined) か所をつなげて \(merged.count) 発話にしました（⌘Z で戻せます）"
     }
 
     func mergeSegmentWithNext(_ segmentID: Int) {

@@ -18,26 +18,37 @@ public enum AudioLoader {
     /// 16kHz モノラル Float32 の PCM 配列に変換する（話者分離モデルの入力形式）。
     public static func loadMono16k(_ url: URL) throws -> [Float] {
         let file = try AVAudioFile(forReading: url)
-        let src = file.processingFormat
-        guard let dst = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16_000, channels: 1, interleaved: false),
-              let converter = AVAudioConverter(from: src, to: dst) else {
-            throw AudioLoaderError.cannotConvert
-        }
-
-        let chunkFrames: AVAudioFrameCount = 65_536
-        guard let inBuf = AVAudioPCMBuffer(pcmFormat: src, frameCapacity: chunkFrames) else {
+        guard let dst = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16_000, channels: 1, interleaved: false) else {
             throw AudioLoaderError.cannotConvert
         }
         var out: [Float] = []
-        out.reserveCapacity(Int(Double(file.length) / src.sampleRate * 16_000) + 16_000)
+        out.reserveCapacity(Int(Double(file.length) / file.processingFormat.sampleRate * 16_000) + 16_000)
+        try readConverted(file, to: dst) { buf in
+            if let ch = buf.floatChannelData {
+                out.append(contentsOf: UnsafeBufferPointer(start: ch[0], count: Int(buf.frameLength)))
+            }
+        }
+        return out
+    }
+
+    /// ファイルを頭から読み、dst の形式に変換したバッファを順に sink へ渡す。
+    static func readConverted(_ file: AVAudioFile, to dst: AVAudioFormat,
+                              chunkFrames: AVAudioFrameCount = 65_536,
+                              sink: (AVAudioPCMBuffer) throws -> Void) throws {
+        let src = file.processingFormat
+        guard let converter = AVAudioConverter(from: src, to: dst),
+              let inBuf = AVAudioPCMBuffer(pcmFormat: src, frameCapacity: chunkFrames) else {
+            throw AudioLoaderError.cannotConvert
+        }
+        let ratio = dst.sampleRate / src.sampleRate
 
         var reachedEnd = false
         while !reachedEnd {
+            try Task.checkCancellation()
             try file.read(into: inBuf, frameCount: chunkFrames)
             if inBuf.frameLength == 0 { break }
             if file.framePosition >= file.length { reachedEnd = true }
 
-            let ratio = dst.sampleRate / src.sampleRate
             let outCapacity = AVAudioFrameCount(Double(inBuf.frameLength) * ratio) + 1024
             guard let outBuf = AVAudioPCMBuffer(pcmFormat: dst, frameCapacity: outCapacity) else {
                 throw AudioLoaderError.cannotConvert
@@ -55,9 +66,7 @@ public enum AudioLoader {
             }
             if let convError { throw convError }
             if status == .error { throw AudioLoaderError.cannotConvert }
-            if let ch = outBuf.floatChannelData, outBuf.frameLength > 0 {
-                out.append(contentsOf: UnsafeBufferPointer(start: ch[0], count: Int(outBuf.frameLength)))
-            }
+            if outBuf.frameLength > 0 { try sink(outBuf) }
         }
         // 変換器に残ったサンプルを吐き出す
         if let tail = AVAudioPCMBuffer(pcmFormat: dst, frameCapacity: 8192) {
@@ -66,11 +75,8 @@ public enum AudioLoader {
                 outStatus.pointee = .endOfStream
                 return nil
             }
-            if let ch = tail.floatChannelData, tail.frameLength > 0 {
-                out.append(contentsOf: UnsafeBufferPointer(start: ch[0], count: Int(tail.frameLength)))
-            }
+            if tail.frameLength > 0 { try sink(tail) }
         }
-        return out
     }
 }
 

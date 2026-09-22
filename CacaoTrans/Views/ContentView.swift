@@ -4,6 +4,7 @@ import AppKit
 
 struct ContentView: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(spacing: 0) {
@@ -49,8 +50,9 @@ struct ContentView: View {
         } message: {
             Text(model.warningMessage ?? "")
         }
-        .navigationTitle(model.transcript?.sourceFileName ?? model.audioURL?.lastPathComponent ?? AppInfo.name)
+        .navigationTitle(model.windowTitle)
         .navigationSubtitle(model.isDirty ? "未保存の変更あり" : "")
+        .onAppear { AppDelegate.reopenWindow = { openWindow(id: "main") } }
     }
 
     @ToolbarContentBuilder
@@ -123,7 +125,7 @@ struct EmptyStateView: View {
                 .foregroundStyle(.secondary)
             Text("プロジェクト（.ccot）を開いて編集しましょう")
                 .font(.title3)
-            Text("CacaoClaudeTrans で作った文字起こしを開き、再生しながら発話の分割・統合・話者の付け替え・置換・書き出しができます。")
+            Text("CacaoClaudeTrans で作った文字起こしを開き、再生しながら発話の分割・統合・話者の付け替え・置換・書き出しができます。音声が同梱されたプロジェクトなら、そのまま再生できます。")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 440)
@@ -131,7 +133,7 @@ struct EmptyStateView: View {
                 .buttonStyle(.borderedProminent)
             HStack(spacing: 6) {
                 Image(systemName: "folder")
-                Text("音声フォルダ: \(model.audioFolder.displayPath)")
+                Text("音声フォルダ（音声が別ファイルのとき）: \(model.audioFolder.displayPath)")
                 Button("変更…") { model.chooseAudioFolder() }
                     .controlSize(.small)
             }
@@ -158,6 +160,26 @@ struct SidebarView: View {
                     LabeledContent("長さ", value: Transcript.formatTime(t.duration, alwaysHours: true))
                     LabeledContent("発話数", value: "\(t.segments.count)")
                     LabeledContent("文字数", value: "\(t.characterCount)")
+                    LabeledContent("音声", value: model.audioSourceDescription)
+                        .help(model.audioSourceHelp)
+                    #if CLAUDE_TRANS
+                    if t.embeddedAudio == nil {
+                        Button {
+                            model.embedAudio()
+                        } label: {
+                            Label("音声を圧縮して同梱", systemImage: "waveform.badge.plus")
+                        }
+                        .disabled(model.audioURL == nil || model.isProcessing)
+                        .help(".ccot だけで再生できるよう、音声を圧縮してプロジェクトに含める")
+                    } else {
+                        Button {
+                            model.removeEmbeddedAudio()
+                        } label: {
+                            Label("同梱した音声を外す", systemImage: "waveform.badge.minus")
+                        }
+                        .disabled(model.isProcessing)
+                    }
+                    #endif
                 }
                 Section {
                     let ctx = (t.context ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -210,6 +232,21 @@ struct SidebarView: View {
             #endif
         }
         .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom) {
+            Text(Self.versionText)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+    }
+
+    private static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let name = info?["CFBundleName"] as? String ?? ""
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        return "\(name) バージョン \(version)"
     }
 }
 

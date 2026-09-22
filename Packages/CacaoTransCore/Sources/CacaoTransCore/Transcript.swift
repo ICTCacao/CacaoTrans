@@ -47,9 +47,27 @@ public struct TranscriptSegment: Codable, Sendable, Identifiable, Equatable, Has
     }
 }
 
+/// プロジェクトに同梱した音声（通常は圧縮済み）。これがあれば元の音声ファイルがなくても再生できる。
+public struct EmbeddedAudio: Codable, Sendable, Equatable {
+    /// "m4a" など。再生用に一時ファイルへ書き出すときの拡張子。
+    public var fileExtension: String
+    public var data: Data
+    /// 表示用の説明（例: "AAC 48kbps モノラル"）。
+    public var codecDescription: String?
+
+    public init(fileExtension: String, data: Data, codecDescription: String? = nil) {
+        self.fileExtension = fileExtension
+        self.data = data
+        self.codecDescription = codecDescription
+    }
+
+    public var byteCount: Int { data.count }
+}
+
 /// 1本の音声に対する文字起こし全体。プロジェクトファイル（JSON）としてそのまま保存できる。
 public struct Transcript: Codable, Sendable, Equatable {
-    public static let formatVersion = 1
+    /// 2: 音声の同梱（embeddedAudio）に対応。1 のファイルもそのまま読める。
+    public static let formatVersion = 2
 
     public var version: Int
     public var sourceFileName: String
@@ -67,6 +85,8 @@ public struct Transcript: Codable, Sendable, Equatable {
     public var context: String?
     /// この音声の用語集（Claude 校正に渡す）。
     public var glossary: String?
+    /// 同梱した音声。nil なら sourceBookmark / sourceFilePath / 音声フォルダから探す。
+    public var embeddedAudio: EmbeddedAudio?
 
     public init(sourceFileName: String, duration: Double, segments: [TranscriptSegment], createdAt: Date = Date()) {
         self.version = Transcript.formatVersion
