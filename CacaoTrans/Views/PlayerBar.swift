@@ -33,14 +33,14 @@ struct PlayerBar: View {
     private var transport: some View {
         HStack(spacing: 6) {
             Button { playback.playPrevious() } label: { Image(systemName: "backward.end.fill") }
-                .help("前の発話（⌘↑）")
+                .help("前の発話（F7 / ⌘↑）")
             Button { playback.togglePlayPause() } label: {
                 Image(systemName: playback.isPlaying ? "pause.fill" : "play.fill")
                     .frame(width: 18, height: 16)
             }
             .help("再生 / 一時停止（F8）")
             Button { playback.playNext() } label: { Image(systemName: "forward.end.fill") }
-                .help("次の発話（⌘↓）")
+                .help("次の発話（F9 / ⌘↓）")
         }
         .buttonStyle(.bordered)
         .controlSize(.regular)

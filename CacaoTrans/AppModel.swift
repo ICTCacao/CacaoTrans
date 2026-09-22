@@ -198,7 +198,7 @@ final class AppModel: ObservableObject {
 
     init() {
         playback.setSegmentsProvider { [weak self] in self?.transcript?.segments ?? [] }
-        installSpaceKeyMonitor()
+        installKeyMonitor()
         // F8 などで再生を始めた発話を選択状態にする（本文を編集中・複数選択中は触らない）
         playback.onStartSegment = { [weak self] id in
             guard let self, self.focusedSegmentID == nil, self.selectedSegmentIDs.count <= 1,
@@ -209,16 +209,26 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// 発話を1件選んでいる（文字を入力中ではない）とき、Space でその発話を頭から再生する。何度でも聞き直せる。
-    /// リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
-    private func installSpaceKeyMonitor() {
+    /// 再生のキー操作。リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
+    /// - F7 / F9: 前／次の発話を再生（本文を入力中でも効く。F8 の再生／一時停止はメニューのショートカット）
+    /// - Space: 発話を1件選んでいる（文字を入力中ではない）とき、その発話を頭から再生する。何度でも聞き直せる
+    private func installKeyMonitor() {
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self, event.keyCode == 49,
+            guard let self,
                   event.modifierFlags.intersection(.deviceIndependentFlagsMask).subtracting([.capsLock, .numericPad, .function]).isEmpty,
-                  let window = event.window, window.attachedSheet == nil,
-                  !(window.firstResponder is NSText),
-                  self.replaySelectedSegment() else { return event }
-            return nil
+                  let window = event.window, window.attachedSheet == nil else { return event }
+            switch Int(event.keyCode) {
+            case 98 where self.playback.isLoaded:   // F7
+                self.playback.playPrevious()
+                return nil
+            case 101 where self.playback.isLoaded:  // F9
+                self.playback.playNext()
+                return nil
+            case 49 where !(window.firstResponder is NSText) && self.replaySelectedSegment():  // Space
+                return nil
+            default:
+                return event
+            }
         }
     }
 

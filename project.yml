@@ -52,8 +52,8 @@ targets:
       properties:
         CFBundleDisplayName: CacaoClaudeTrans
         CFBundleName: CacaoClaudeTrans
-        CFBundleShortVersionString: "2.0.0"
-        CFBundleVersion: "2.0.0"
+        CFBundleShortVersionString: "2.1.0"
+        CFBundleVersion: "2.1.0"
         LSMinimumSystemVersion: "26.0"
         CFBundleDevelopmentRegion: ja
         CFBundleLocalizations: [ja, en]
@@ -94,8 +94,8 @@ targets:
       properties:
         CFBundleDisplayName: CacaoTrans
         CFBundleName: CacaoTrans
-        CFBundleShortVersionString: "2.0.0"
-        CFBundleVersion: "2.0.0"
+        CFBundleShortVersionString: "2.1.0"
+        CFBundleVersion: "2.1.0"
         LSMinimumSystemVersion: "26.0"
         CFBundleDevelopmentRegion: ja
         CFBundleLocalizations: [ja, en]

@@ -55,7 +55,7 @@ struct FindReplaceView: View {
                     Text("発話の分割: 本文にカーソルを置いて ⌘↩。句点ごとに分けるなら ⌥⌘↩。統合は ⌥⌘↑ / ⌥⌘↓。")
                     Text("被った発言を足すには ⇧⌘↩ でこの発話の後に空の発話を挿入し、本文を入力。")
                     Text("複数まとめてつなげるには、行の左端の丸をクリックして選び ⌘J。")
-                    Text("Tab / ⇧Tab で次／前の発話の本文へ。F8 で再生／一時停止。")
+                    Text("Tab / ⇧Tab で次／前の発話の本文へ。F8 で再生／一時停止、F7 / F9 で前／次の発話。")
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
