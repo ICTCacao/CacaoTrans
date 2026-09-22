@@ -215,6 +215,8 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 ## 6. 聞いて確認する
 
+<style scoped>section { font-size: 24px; } h3, strong { font-size: 1em; }</style>
+
 <div class="shot">
 
 ![w:1100](img/player-bar.png)
@@ -229,7 +231,6 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 - 行の ▶ を押すと、その発話だけ再生して止まる
 - もう一度押すか <kbd>F8</kbd> で一時停止
 - 本文に入っている発話（<kbd>Tab</kbd> やクリックで移った行）は <kbd>F8</kbd> で頭から再生
-- 行を選択している（本文は編集していない）ときは <kbd>Space</kbd> でその発話を頭から再生。何度押しても同じ発話を聞き直せる
 - 再生中の行は色が付き、画面が自動で追従
 
 </div>
@@ -242,6 +243,9 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 **ひとりの話者だけ聞きたいとき**
 - 右端の <strong>話者</strong> でその人を選ぶ
+
+**同じ発話を聞き直したいとき**
+- 行を選択して <kbd>Space</kbd>。押すたび頭から再生
 
 </div>
 </div>
@@ -382,17 +386,19 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 ## 14. ショートカット一覧
 
+<style scoped>table { font-size: 19px; } td, th { padding-top: 4px; padding-bottom: 4px; }</style>
+
 | 操作 | キー | 操作 | キー |
 |---|---|---|---|
 | プロジェクトを開く | <kbd>⌘</kbd><kbd>O</kbd> | 保存 | <kbd>⌘</kbd><kbd>S</kbd> |
 | 書き出し | <kbd>⌘</kbd><kbd>E</kbd> | 検索・置換 | <kbd>⌘</kbd><kbd>F</kbd> |
 | 再生／一時停止 | <kbd>F8</kbd> | 次／前の発話 | <kbd>⌘</kbd><kbd>↓</kbd> ／ <kbd>⌘</kbd><kbd>↑</kbd> |
-| 選択中の発話を頭から再生（繰り返し） | <kbd>Space</kbd> | | |
 | カーソル位置で分割 | <kbd>⌘</kbd><kbd>↩︎</kbd> | 句点で分割 | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 前／次とつなげる | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>↓</kbd> | 選択をつなげる | <kbd>⌘</kbd><kbd>J</kbd> |
 | 後ろに発話を挿入 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> | 前に発話を挿入 | <kbd>⇧</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 元に戻す | <kbd>⌘</kbd><kbd>Z</kbd>（やり直し <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd>） | 本文内で改行 | <kbd>⌥</kbd><kbd>↩︎</kbd> |
 | 次／前の発話の本文へ | <kbd>Tab</kbd> ／ <kbd>⇧</kbd><kbd>Tab</kbd> | 同じ話者の連続をすべてつなげる | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>J</kbd> |
+| 選択中の発話を頭から再生 | <kbd>Space</kbd> | | |
 
 ---
 
