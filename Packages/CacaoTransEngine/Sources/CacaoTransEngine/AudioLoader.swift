@@ -9,15 +9,27 @@ public enum AudioLoader {
         supportedExtensions.contains(url.pathExtension.lowercased())
     }
 
+    /// AVAudioFile を開く。中身を音声として解釈できないときは、原因が分かる日本語のエラーにする。
+    public static func open(_ url: URL) throws -> AVAudioFile {
+        do {
+            return try AVAudioFile(forReading: url)
+        } catch let error as NSError where unreadableCodes.contains(error.code) {
+            throw AudioLoaderError.unreadable(url.lastPathComponent)
+        }
+    }
+
+    /// 'dta?' 不正なファイル / 'typ?' 未対応のファイル形式 / 'fmt?' 未対応のデータ形式 / 'wht?' 不明
+    private static let unreadableCodes: Set<Int> = [1685348671, 1954115647, 1718449215, 2003334207]
+
     /// 長さ（秒）
     public static func duration(of url: URL) throws -> Double {
-        let file = try AVAudioFile(forReading: url)
+        let file = try open(url)
         return Double(file.length) / file.processingFormat.sampleRate
     }
 
     /// 16kHz モノラル Float32 の PCM 配列に変換する（話者分離モデルの入力形式）。
     public static func loadMono16k(_ url: URL) throws -> [Float] {
-        let file = try AVAudioFile(forReading: url)
+        let file = try open(url)
         guard let dst = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 16_000, channels: 1, interleaved: false) else {
             throw AudioLoaderError.cannotConvert
         }
@@ -83,11 +95,13 @@ public enum AudioLoader {
 public enum AudioLoaderError: Error, LocalizedError {
     case cannotConvert
     case unsupported(String)
+    case unreadable(String)
 
     public var errorDescription: String? {
         switch self {
         case .cannotConvert: return "音声を PCM に変換できませんでした。"
         case .unsupported(let ext): return "対応していない拡張子です: .\(ext)"
+        case .unreadable(let name): return "「\(name)」を音声として読み込めませんでした。対応していない形式か、ファイルが壊れている可能性があります。m4a や wav に変換してからお試しください。"
         }
     }
 }

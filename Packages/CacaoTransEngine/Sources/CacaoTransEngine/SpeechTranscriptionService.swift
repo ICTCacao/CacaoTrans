@@ -35,7 +35,7 @@ public final class SpeechTranscriptionService {
     public func transcribe(url: URL, progress: (@Sendable (Double) -> Void)? = nil) async throws -> Output {
         try await prepare()
         let transcriber = try await makeTranscriber()
-        let file = try AVAudioFile(forReading: url)
+        let file = try AudioLoader.open(url)
         let duration = Double(file.length) / file.processingFormat.sampleRate
 
         let analyzer = SpeechAnalyzer(modules: [transcriber])

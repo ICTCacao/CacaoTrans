@@ -24,7 +24,7 @@ public enum AudioCompressor {
 
     /// AAC モノラルに変換した m4a のバイト列を返す。
     public static func compress(_ url: URL, progress: (@Sendable (Double) -> Void)? = nil) throws -> Data {
-        let input = try AVAudioFile(forReading: url)
+        let input = try AudioLoader.open(url)
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("CacaoTransCompress", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let tmp = dir.appendingPathComponent(UUID().uuidString + "." + fileExtension)
