@@ -765,14 +765,18 @@ final class AppModel: ObservableObject {
         let tail = ns.substring(from: loc).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !head.isEmpty, !tail.isEmpty else { return }
         pushUndo()
-        let ratio = Double(loc) / Double(ns.length)
-        let splitTime = seg.start + (seg.end - seg.start) * ratio
+        // 再生を止めた位置がこの発話の中なら、そこを境目にする（耳で確かめた位置）。そうでなければ文字数の比率で推定する。
+        let playhead = playback.currentTime
+        let usesPlayhead = playback.isLoaded && playhead > seg.start + 0.05 && playhead < seg.end - 0.05
+        let splitTime = usesPlayhead ? playhead : seg.start + (seg.end - seg.start) * Double(loc) / Double(ns.length)
         let newID = (t.segments.map(\.id).max() ?? 0) + 1
         t.segments[idx].text = head
         t.segments[idx].end = splitTime
         t.segments.insert(TranscriptSegment(id: newID, speaker: seg.speaker, start: splitTime, end: seg.end, text: tail), at: idx + 1)
         transcript = t
-        lastReplaceMessage = "発話を分割しました"
+        lastReplaceMessage = usesPlayhead
+            ? "再生位置 \(Transcript.formatTime(splitTime, alwaysHours: true)) で分割しました"
+            : "発話を分割しました（時刻は文字数から推定）"
     }
 
     /// 「。」「？」「！」ごとに分割する。
@@ -1012,6 +1016,9 @@ final class AppModel: ObservableObject {
         undoStack.append(transcript)
         if undoStack.count > 30 { undoStack.removeFirst() }
         redoStack.removeAll()
+        // 本文の入力欄に残った文字入力の取り消し履歴を捨てる。残っていると ⌘Z（smartUndo）がそちらを優先し、
+        // 分割・結合などで書き換わった本文に古い取り消しを当ててしまう。この後に打った文字は従来どおり先に取り消される。
+        (NSApp.keyWindow?.firstResponder as? NSTextView)?.undoManager?.removeAllActions()
     }
 
     func undo() {

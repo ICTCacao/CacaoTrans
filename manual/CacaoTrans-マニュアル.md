@@ -48,7 +48,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 # CacaoTrans マニュアル
 
 文字起こしを聞きながら直して、仕上げるためのアプリ
-バージョン 3.0.0 ／ 2026 年 10 月
+バージョン 3.0.1 ／ 2026 年 10 月
 
 ---
 
@@ -96,7 +96,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. 受け取った **CacaoTrans-3.0.0.dmg** をダブルクリック
+1. 受け取った **CacaoTrans-3.0.1.dmg** をダブルクリック
 2. 左の **CacaoTrans** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 
@@ -309,6 +309,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 | 複数をまとめてつなげる | 左端の ○ で選んで <kbd>⌘</kbd><kbd>J</kbd> |
 | 選択した行を削除 | ○ で選んで、上のバーの「削除」 |
 
+- 聞きながら <kbd>F8</kbd> で止めて <kbd>⌘</kbd><kbd>↩︎</kbd> で分けると、**止めた位置**が再生の境目になります（止めていなければ文字数から推定）
 - <kbd>F6</kbd> ／ <kbd>F10</kbd> は、本文に入っている発話（なければ1件だけ選んだ発話）が対象です
 - どれも **右クリックメニュー**からも実行できます
 - 間違えたら <kbd>⌘</kbd><kbd>Z</kbd> で元に戻せます
@@ -425,4 +426,4 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 分からないことや不具合は、画面の写真を添えて管理者へ連絡してください。
 
-<p class="small">CacaoTrans 3.0.0 ／ © 2026 ICTCacao</p>
+<p class="small">CacaoTrans 3.0.1 ／ © 2026 ICTCacao</p>
