@@ -211,6 +211,8 @@ final class AppModel: ObservableObject {
 
     /// 再生のキー操作。リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
     /// - F7 / F9: 前／次の発話を再生（本文を入力中でも効く。F8 の再生／一時停止はメニューのショートカット）
+    /// - F5: 話者を順に切り替える（本文の入力欄が F5 を「入力補完」に使うため、メニューのショートカットでは届かない）
+    /// - F6: 選択した発話をつなげる（⌘J と同じ。メニュー項目にはショートカットを1つしか付けられないのでここで拾う）
     /// - Space: 発話を1件選んでいる（文字を入力中ではない）とき、その発話を頭から再生する。何度でも聞き直せる
     private func installKeyMonitor() {
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -223,6 +225,12 @@ final class AppModel: ObservableObject {
                 return nil
             case 101 where self.playback.isLoaded:  // F9
                 self.playback.playNext()
+                return nil
+            case 96 where self.focusedSegmentID != nil || !self.selectedSegmentIDs.isEmpty:  // F5
+                self.cycleSpeaker()
+                return nil
+            case 97 where self.selectedSegmentIDs.count >= 2:  // F6（⌘J と同じ）
+                self.mergeSelected()
                 return nil
             case 49 where !(window.firstResponder is NSText) && self.replaySelectedSegment():  // Space
                 return nil
@@ -885,8 +893,11 @@ final class AppModel: ObservableObject {
         guard var t = transcript else { return }
         let targets: Set<Int> = focusedSegmentID.map { [$0] } ?? selectedSegmentIDs
         let speakers = allSpeakers
-        guard speakers.count >= 2,
-              let first = t.segments.first(where: { targets.contains($0.id) }) else { return }
+        guard let first = t.segments.first(where: { targets.contains($0.id) }) else { return }
+        guard speakers.count >= 2 else {
+            lastReplaceMessage = "話者が1人しかいないため切り替えられません（話者メニューの「新しい話者を割り当て」で追加できます）"
+            return
+        }
         let next = speakers[((speakers.firstIndex(of: first.speaker) ?? -1) + 1) % speakers.count]
         pushUndo()
         for i in t.segments.indices where targets.contains(t.segments[i].id) {

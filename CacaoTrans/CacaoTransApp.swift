@@ -122,8 +122,7 @@ struct CacaoTransApp: App {
                 Button("連続する同じ話者の発話をすべてつなげる") { model.mergeConsecutiveSameSpeaker() }
                     .keyboardShortcut("j", modifiers: [.command, .shift])
                     .disabled(model.transcript == nil)
-                Button("話者を順に切り替え") { model.cycleSpeaker() }
-                    .keyboardShortcut(KeyEquivalent(Character(UnicodeScalar(NSF5FunctionKey)!)), modifiers: [])
+                Button("話者を順に切り替え（F5）") { model.cycleSpeaker() }
                     .disabled(model.focusedSegmentID == nil && model.selectedSegmentIDs.isEmpty)
                 Button("選択を解除") { model.clearSelection() }
                     .disabled(model.selectedSegmentIDs.isEmpty)
