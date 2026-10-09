@@ -81,7 +81,7 @@ struct ContentView: View {
             Button { model.showFindReplace.toggle() } label: { Label("検索・置換", systemImage: "text.magnifyingglass") }
                 .disabled(model.transcript == nil)
                 .help("一括で検索・置換する（⌘F）")
-            Button { model.saveProject() } label: { Label("保存", systemImage: "square.and.arrow.down") }
+            Button { model.saveProject() } label: { Label { Text("保存") } icon: { Image(nsImage: SaveIcon.image) } }
                 .disabled(model.transcript == nil)
                 .help("プロジェクトとして保存（⌘S）")
             Button { model.showExport = true } label: { Label("書き出し", systemImage: "square.and.arrow.up") }
@@ -256,4 +256,35 @@ enum SpeakerColor {
         let n = Int(label.dropFirst(2)) ?? (abs(label.hashValue) % palette.count + 1)
         return palette[(max(1, n) - 1) % palette.count]
     }
+}
+
+/// 保存ボタンのフロッピーディスク。SF Symbols にないので描く。テンプレート画像にしてツールバーの色や無効表示に合わせる。
+enum SaveIcon {
+    static let image: NSImage = {
+        let img = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { _ in
+            NSColor.black.set()
+            let body = NSBezierPath()
+            body.move(to: NSPoint(x: 2.5, y: 2.5))
+            body.line(to: NSPoint(x: 12.5, y: 2.5))
+            body.line(to: NSPoint(x: 15.5, y: 5.5))
+            body.line(to: NSPoint(x: 15.5, y: 15.5))
+            body.line(to: NSPoint(x: 2.5, y: 15.5))
+            body.close()
+            body.lineWidth = 1.5
+            body.lineJoinStyle = .round
+            body.stroke()
+            // 上のシャッターと窓
+            let shutter = NSBezierPath(rect: NSRect(x: 5.5, y: 2.5, width: 6.5, height: 4.5))
+            shutter.lineWidth = 1.5
+            shutter.stroke()
+            NSBezierPath(rect: NSRect(x: 9.2, y: 3.6, width: 1.6, height: 2.4)).fill()
+            // 下のラベル
+            let label = NSBezierPath(roundedRect: NSRect(x: 5.25, y: 10, width: 7.5, height: 5.5), xRadius: 0.8, yRadius: 0.8)
+            label.lineWidth = 1.5
+            label.stroke()
+            return true
+        }
+        img.isTemplate = true
+        return img
+    }()
 }

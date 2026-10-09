@@ -244,6 +244,33 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// F8 でカーソル位置から再生するとき、カーソル位置の何秒前から流すか。時刻は文字数の比率からの推定なので余裕を持たせる。
+    private static let cursorPlaybackLead: Double = 1.5
+    /// 直前に F8 でカーソル位置から再生したときの発話とカーソル位置。カーソルが動いていなければ続きから再生する。
+    private var lastCursorPlay: (segmentID: Int, location: Int)?
+
+    /// F8: 再生中なら一時停止。本文を編集中なら、カーソル位置の少し前から再生する
+    /// （止めた後カーソルを動かさずにもう一度押すと続きから）。本文に入っていなければ従来どおり。
+    func togglePlayPause() {
+        guard playback.isLoaded else { return }
+        guard !playback.isPlaying, let id = focusedSegmentID,
+              let seg = transcript?.segments.first(where: { $0.id == id }),
+              let tv = NSApp.keyWindow?.firstResponder as? NSTextView else {
+            playback.togglePlayPause()
+            return
+        }
+        let loc = tv.selectedRange().location
+        let length = (seg.text as NSString).length
+        if let last = lastCursorPlay, last.segmentID == id, last.location == loc,
+           playback.playingSegmentID == id, playback.currentTime > seg.start, playback.currentTime < seg.end - 0.05 {
+            playback.togglePlayPause()  // カーソルが動いていないので、止めた所から続ける
+            return
+        }
+        lastCursorPlay = (id, loc)
+        let cursorTime = seg.start + (seg.end - seg.start) * Double(min(loc, length)) / Double(max(length, 1))
+        playback.play(segment: seg, from: cursorTime - Self.cursorPlaybackLead)
+    }
+
     /// 1件だけ選んでいる発話を頭から再生する。再生できたら true。
     private func replaySelectedSegment() -> Bool {
         guard playback.isLoaded, selectedSegmentIDs.count == 1, let id = selectedSegmentIDs.first,

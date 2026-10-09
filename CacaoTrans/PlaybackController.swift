@@ -116,7 +116,8 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
 
     // MARK: - Transport
 
-    func play(segment: TranscriptSegment) {
+    /// 発話を再生する。from を渡すとその時刻から（発話の中に収める）。
+    func play(segment: TranscriptSegment, from time: Double? = nil) {
         guard let player else { return }
         if playingSegmentID == segment.id, isPlaying {
             pause()
@@ -125,7 +126,7 @@ final class PlaybackController: NSObject, ObservableObject, AVAudioPlayerDelegat
         cuedSegmentID = nil
         playingSegmentID = segment.id
         stopAt = continuous ? nil : max(segment.end, segment.start + 0.3)
-        player.currentTime = max(0, segment.start)
+        player.currentTime = max(0, min(max(time ?? segment.start, segment.start), segment.end - 0.1))
         player.rate = rate
         player.play()
         isPlaying = true

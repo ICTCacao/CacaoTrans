@@ -139,7 +139,7 @@ struct CacaoTransApp: App {
                 .disabled(model.focusedSegmentID == nil)
             }
             CommandMenu("再生") {
-                Button("再生 / 一時停止") { model.playback.togglePlayPause() }
+                Button("再生 / 一時停止") { model.togglePlayPause() }
                     .keyboardShortcut(KeyEquivalent(Character(UnicodeScalar(NSF8FunctionKey)!)), modifiers: [])
                     .disabled(!model.playback.isLoaded)
                 Button("次の発話") { model.playback.playNext() }

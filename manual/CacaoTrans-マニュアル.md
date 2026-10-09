@@ -48,7 +48,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 # CacaoTrans マニュアル
 
 文字起こしを聞きながら直して、仕上げるためのアプリ
-バージョン 3.0.1 ／ 2026 年 10 月
+バージョン 3.0.3 ／ 2026 年 10 月
 
 ---
 
@@ -96,7 +96,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. 受け取った **CacaoTrans-3.0.1.dmg** をダブルクリック
+1. 受け取った **CacaoTrans-3.0.3.dmg** をダブルクリック
 2. 左の **CacaoTrans** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 
@@ -230,7 +230,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 **基本**
 - 行の ▶ を押すと、その発話だけ再生して止まる
 - もう一度押すか <kbd>F8</kbd> で一時停止
-- 本文に入っている発話（<kbd>Tab</kbd> やクリックで移った行）は <kbd>F8</kbd> で頭から再生
+- 本文に入っている発話（<kbd>Tab</kbd> やクリックで移った行）は <kbd>F8</kbd> で**カーソルの少し前（約1.5秒前）から**再生。止めた後カーソルを動かさずにもう一度押すと続きから
 - 再生中の行は色が付き、画面が自動で追従
 
 </div>
@@ -256,7 +256,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 - 本文をクリックしてそのまま書き換えます（普通のテキスト入力）
 - 一覧の上部に <kbd>F5</kbd>〜<kbd>F10</kbd> の働きがいつも表示されています
-- <kbd>Tab</kbd> で次の発話、<kbd>⇧</kbd><kbd>Tab</kbd> で前の発話の本文へ移れます。移った発話は <kbd>F8</kbd> で頭から聞けます
+- <kbd>Tab</kbd> で次の発話、<kbd>⇧</kbd><kbd>Tab</kbd> で前の発話の本文へ移れます。<kbd>F8</kbd> でカーソルの少し前から聞けます（カーソルを先頭に置けば頭から）
 - <kbd>F5</kbd> を押すたびに、その発話の話者が 話者1 → 話者2 → 話者1 … と順に切り替わります
 - 改行を入れたいときは <kbd>⌥</kbd><kbd>↩︎</kbd>
 - 直した内容はすぐ反映され、あとで **保存**（<kbd>⌘</kbd><kbd>S</kbd>）します
@@ -426,4 +426,4 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 分からないことや不具合は、画面の写真を添えて管理者へ連絡してください。
 
-<p class="small">CacaoTrans 3.0.1 ／ © 2026 ICTCacao</p>
+<p class="small">CacaoTrans 3.0.3 ／ © 2026 ICTCacao</p>
