@@ -13,6 +13,8 @@ struct TranscriptListView: View {
 
         ScrollViewReader { proxy in
             VStack(spacing: 0) {
+                FunctionKeyBar()
+                Divider()
                 if !model.selectedSegmentIDs.isEmpty {
                     SelectionBar()
                 }
@@ -53,6 +55,45 @@ struct TranscriptListView: View {
                 }
             }
             .animation(.default, value: model.lastReplaceMessage)
+            }
+        }
+    }
+}
+
+/// 一覧の上部に常に出す F5〜F10 の早見表。キーの処理は AppModel.installKeyMonitor とメニュー（F8）。
+struct FunctionKeyBar: View {
+    private static let keys: [(key: String, label: String)] = [
+        ("F5", "話者を切り替え"),
+        ("F6", "次の発話とつなげる"),
+        ("F7", "前の発話を再生"),
+        ("F8", "再生／一時停止"),
+        ("F9", "次の発話を再生"),
+        ("F10", "前の発話とつなげる"),
+    ]
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            row
+            ScrollView(.horizontal, showsIndicators: false) { row }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var row: some View {
+        HStack(spacing: 14) {
+            ForEach(Self.keys, id: \.key) { item in
+                HStack(spacing: 5) {
+                    Text(item.key)
+                        .font(.system(.caption, design: .monospaced).weight(.semibold))
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
+                    Text(item.label)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize()
+                }
             }
         }
     }

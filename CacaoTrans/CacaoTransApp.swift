@@ -105,12 +105,12 @@ struct CacaoTransApp: App {
                 }
                 .keyboardShortcut(.return, modifiers: [.command, .option])
                 .disabled(model.focusedSegmentID == nil)
-                Button("前の発話とつなげる") {
+                Button("前の発話とつなげる（F10）") {
                     if let id = model.focusedSegmentID { model.mergeSegmentWithPrevious(id) }
                 }
                 .keyboardShortcut(.upArrow, modifiers: [.command, .option])
                 .disabled(model.focusedSegmentID == nil)
-                Button("次の発話とつなげる") {
+                Button("次の発話とつなげる（F6）") {
                     if let id = model.focusedSegmentID { model.mergeSegmentWithNext(id) }
                 }
                 .keyboardShortcut(.downArrow, modifiers: [.command, .option])

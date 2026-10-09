@@ -209,10 +209,11 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// 再生のキー操作。リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
-    /// - F7 / F9: 前／次の発話を再生（本文を入力中でも効く。F8 の再生／一時停止はメニューのショートカット）
-    /// - F5: 話者を順に切り替える（本文の入力欄が F5 を「入力補完」に使うため、メニューのショートカットでは届かない）
-    /// - F6: 選択した発話をつなげる（⌘J と同じ。メニュー項目にはショートカットを1つしか付けられないのでここで拾う）
+    /// ファンクションキーなどの操作。リストにキーボードフォーカスがなくても効くよう、SwiftUI の onKeyPress ではなくアプリ全体のキー入力で拾う。
+    /// 本文を入力中でも効く（入力欄は F5 を「入力補完」に使うため、メニューのショートカットでは届かない）。一覧上部の FunctionKeyBar と対応。
+    /// - F5: 話者を順に切り替える
+    /// - F6 / F10: 次／前の発話とつなげる
+    /// - F7 / F9: 前／次の発話を再生（F8 の再生／一時停止はメニューのショートカット）
     /// - Space: 発話を1件選んでいる（文字を入力中ではない）とき、その発話を頭から再生する。何度でも聞き直せる
     private func installKeyMonitor() {
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
@@ -229,8 +230,11 @@ final class AppModel: ObservableObject {
             case 96 where self.focusedSegmentID != nil || !self.selectedSegmentIDs.isEmpty:  // F5
                 self.cycleSpeaker()
                 return nil
-            case 97 where self.selectedSegmentIDs.count >= 2:  // F6（⌘J と同じ）
-                self.mergeSelected()
+            case 97 where self.transcript != nil:   // F6
+                self.mergeTargetSegment(withNext: true)
+                return nil
+            case 109 where self.transcript != nil:  // F10
+                self.mergeTargetSegment(withNext: false)
                 return nil
             case 49 where !(window.firstResponder is NSText) && self.replaySelectedSegment():  // Space
                 return nil
@@ -962,6 +966,27 @@ final class AppModel: ObservableObject {
         t.segments.remove(at: idx)
         transcript = t
         lastReplaceMessage = "前の発話とつなげました"
+    }
+
+    /// F6 / F10: 本文に入っている発話（なければ1件だけ選んでいる発話）を次／前の発話とつなげる。
+    /// 前とつなげると対象の発話は消えるので、本文のフォーカスと選択をつなげた先の発話へ移す。
+    func mergeTargetSegment(withNext: Bool) {
+        guard let t = transcript else { return }
+        let id = focusedSegmentID ?? (selectedSegmentIDs.count == 1 ? selectedSegmentIDs.first : nil)
+        guard let id, let idx = t.segments.firstIndex(where: { $0.id == id }) else {
+            lastReplaceMessage = "つなげる発話を1件選ぶか、本文に入ってから押してください"
+            return
+        }
+        if withNext {
+            guard idx + 1 < t.segments.count else { lastReplaceMessage = "次の発話がありません"; return }
+            mergeSegmentWithNext(id)
+        } else {
+            guard idx > 0 else { lastReplaceMessage = "前の発話がありません"; return }
+            let prevID = t.segments[idx - 1].id
+            mergeSegmentWithPrevious(id)
+            if focusedSegmentID == id { focusedSegmentID = prevID }
+            if selectedSegmentIDs.contains(id) { selectedSegmentIDs = [prevID] }
+        }
     }
 
     func deleteSegment(_ segmentID: Int) {

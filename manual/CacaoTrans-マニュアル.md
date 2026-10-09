@@ -48,7 +48,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 # CacaoTrans マニュアル
 
 文字起こしを聞きながら直して、仕上げるためのアプリ
-バージョン 2.5.0 ／ 2026 年 10 月
+バージョン 3.0.0 ／ 2026 年 10 月
 
 ---
 
@@ -96,7 +96,7 @@ footer: "CacaoTrans マニュアル ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. 受け取った **CacaoTrans-2.5.0.dmg** をダブルクリック
+1. 受け取った **CacaoTrans-3.0.0.dmg** をダブルクリック
 2. 左の **CacaoTrans** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 
@@ -255,6 +255,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 ## 7. 本文を直す
 
 - 本文をクリックしてそのまま書き換えます（普通のテキスト入力）
+- 一覧の上部に <kbd>F5</kbd>〜<kbd>F10</kbd> の働きがいつも表示されています
 - <kbd>Tab</kbd> で次の発話、<kbd>⇧</kbd><kbd>Tab</kbd> で前の発話の本文へ移れます。移った発話は <kbd>F8</kbd> で頭から聞けます
 - <kbd>F5</kbd> を押すたびに、その発話の話者が 話者1 → 話者2 → 話者1 … と順に切り替わります
 - 改行を入れたいときは <kbd>⌥</kbd><kbd>↩︎</kbd>
@@ -303,11 +304,12 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 |---|---|
 | 途中で分ける | 本文の分けたい位置にカーソルを置いて <kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 句点（。？！）ごとに分ける | 本文にカーソルを置いて <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
-| 前の発話とつなげる | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd> |
-| 次の発話とつなげる | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↓</kbd> |
-| 複数をまとめてつなげる | 左端の ○ で選んで <kbd>⌘</kbd><kbd>J</kbd>（または <kbd>F6</kbd>） |
+| 前の発話とつなげる | <kbd>F10</kbd>（または <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd>） |
+| 次の発話とつなげる | <kbd>F6</kbd>（または <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↓</kbd>） |
+| 複数をまとめてつなげる | 左端の ○ で選んで <kbd>⌘</kbd><kbd>J</kbd> |
 | 選択した行を削除 | ○ で選んで、上のバーの「削除」 |
 
+- <kbd>F6</kbd> ／ <kbd>F10</kbd> は、本文に入っている発話（なければ1件だけ選んだ発話）が対象です
 - どれも **右クリックメニュー**からも実行できます
 - 間違えたら <kbd>⌘</kbd><kbd>Z</kbd> で元に戻せます
 
@@ -395,12 +397,12 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 | 書き出し | <kbd>⌘</kbd><kbd>E</kbd> | 検索・置換 | <kbd>⌘</kbd><kbd>F</kbd> |
 | 再生／一時停止 | <kbd>F8</kbd> | 前／次の発話 | <kbd>F7</kbd> ／ <kbd>F9</kbd> |
 | カーソル位置で分割 | <kbd>⌘</kbd><kbd>↩︎</kbd> | 句点で分割 | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
-| 前／次とつなげる | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>↓</kbd> | 選択をつなげる | <kbd>⌘</kbd><kbd>J</kbd> ／ <kbd>F6</kbd> |
+| 前／次とつなげる | <kbd>F10</kbd> ／ <kbd>F6</kbd> | 前／次とつなげる（別キー） | <kbd>⌥</kbd><kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>↓</kbd> |
 | 後ろに発話を挿入 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> | 前に発話を挿入 | <kbd>⇧</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>↩︎</kbd> |
 | 元に戻す | <kbd>⌘</kbd><kbd>Z</kbd>（やり直し <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd>） | 本文内で改行 | <kbd>⌥</kbd><kbd>↩︎</kbd> |
 | 次／前の発話の本文へ | <kbd>Tab</kbd> ／ <kbd>⇧</kbd><kbd>Tab</kbd> | 同じ話者の連続をすべてつなげる | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>J</kbd> |
 | 選択中の発話を頭から再生 | <kbd>Space</kbd> | 前／次の発話（別キー） | <kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>⌘</kbd><kbd>↓</kbd> |
-| 話者を順に切り替え（1→2→1…） | <kbd>F5</kbd> | | |
+| 話者を順に切り替え | <kbd>F5</kbd> | 選択をつなげる | <kbd>⌘</kbd><kbd>J</kbd> |
 
 ---
 
@@ -423,4 +425,4 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 分からないことや不具合は、画面の写真を添えて管理者へ連絡してください。
 
-<p class="small">CacaoTrans 2.5.0 ／ © 2026 ICTCacao</p>
+<p class="small">CacaoTrans 3.0.0 ／ © 2026 ICTCacao</p>
