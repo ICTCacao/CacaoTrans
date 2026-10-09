@@ -879,6 +879,23 @@ final class AppModel: ObservableObject {
         lastReplaceMessage = "\(n) 件の話者を「\(t.displayName(for: speaker))」にしました"
     }
 
+    /// F5: 対象の発話の話者を一覧の次の話者に切り替える（最後の次は最初へ戻る: 1 → 2 → 1 …）。
+    /// 対象は本文を編集中の発話、なければ選択中の発話。複数のときは先頭の発話を基準に同じ話者へそろえる。
+    func cycleSpeaker() {
+        guard var t = transcript else { return }
+        let targets: Set<Int> = focusedSegmentID.map { [$0] } ?? selectedSegmentIDs
+        let speakers = allSpeakers
+        guard speakers.count >= 2,
+              let first = t.segments.first(where: { targets.contains($0.id) }) else { return }
+        let next = speakers[((speakers.firstIndex(of: first.speaker) ?? -1) + 1) % speakers.count]
+        pushUndo()
+        for i in t.segments.indices where targets.contains(t.segments[i].id) {
+            t.segments[i].speaker = next
+        }
+        transcript = t
+        lastReplaceMessage = "話者を「\(t.displayName(for: next))」にしました"
+    }
+
     func deleteSelected() {
         guard var t = transcript, !selectedSegmentIDs.isEmpty else { return }
         pushUndo()

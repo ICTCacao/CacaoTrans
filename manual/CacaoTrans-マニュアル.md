@@ -256,6 +256,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 
 - 本文をクリックしてそのまま書き換えます（普通のテキスト入力）
 - <kbd>Tab</kbd> で次の発話、<kbd>⇧</kbd><kbd>Tab</kbd> で前の発話の本文へ移れます。移った発話は <kbd>F8</kbd> で頭から聞けます
+- <kbd>F5</kbd> を押すたびに、その発話の話者が 話者1 → 話者2 → 話者1 … と順に切り替わります
 - 改行を入れたいときは <kbd>⌥</kbd><kbd>↩︎</kbd>
 - 直した内容はすぐ反映され、あとで **保存**（<kbd>⌘</kbd><kbd>S</kbd>）します
 
@@ -399,6 +400,7 @@ Applications フォルダの CacaoTrans を **右クリック →「開く」→
 | 元に戻す | <kbd>⌘</kbd><kbd>Z</kbd>（やり直し <kbd>⇧</kbd><kbd>⌘</kbd><kbd>Z</kbd>） | 本文内で改行 | <kbd>⌥</kbd><kbd>↩︎</kbd> |
 | 次／前の発話の本文へ | <kbd>Tab</kbd> ／ <kbd>⇧</kbd><kbd>Tab</kbd> | 同じ話者の連続をすべてつなげる | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>J</kbd> |
 | 選択中の発話を頭から再生 | <kbd>Space</kbd> | 前／次の発話（別キー） | <kbd>⌘</kbd><kbd>↑</kbd> ／ <kbd>⌘</kbd><kbd>↓</kbd> |
+| 話者を順に切り替え（1→2→1…） | <kbd>F5</kbd> | | |
 
 ---
 
